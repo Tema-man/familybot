@@ -2,7 +2,7 @@
 
 Telegram Bot for my friends
 
-![](readme_assets/j.png)
+![](readme_assets/j.jpg)
 Wake up Neo
 
 You obosralsya
