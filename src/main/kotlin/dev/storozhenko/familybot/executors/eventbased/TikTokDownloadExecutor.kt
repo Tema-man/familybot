@@ -46,7 +46,7 @@ class TikTokDownloadExecutor(
                 easyKeyValueService.get(TikTokDownload, context.chatKey, false)
     }
 
-    override fun priority(context: ExecutorContext) = Priority.VERY_LOW
+    override fun priority(context: ExecutorContext) = Priority.HIGH
 
     private fun getTikTokUrls(context: ExecutorContext): List<String> {
         return context

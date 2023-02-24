@@ -19,5 +19,5 @@ class SleepKeyWordProcessor : KeyWordProcessor {
         return { it.sendSticker(context, Sticker.SWEET_DREAMS, replyToUpdate = true) }
     }
 
-    override fun isRandom(context: ExecutorContext) = true
+    override fun isRandom(context: ExecutorContext) = false
 }

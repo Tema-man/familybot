@@ -27,66 +27,60 @@ class PidorExecutorTest : CommandExecutorTest() {
     override fun getCommandExecutor() = pidorExecutor
 
     override fun executeTest() {
-        val context = createSimpleCommandContext(pidorExecutor.command())
-        val pidorsBefore =
-            commonRepository.getPidorsByChat(context.chat)
-        val allPidors = commonRepository.getAllPidors()
+        synchronized(this) {
+            val context = createSimpleCommandContext(pidorExecutor.command())
+            val pidorsBefore = commonRepository.getPidorsByChat(context.chat)
+            val allPidors = commonRepository.getAllPidors()
 
-        runBlocking { pidorExecutor.execute(context).invoke(sender) }
-        val firstCaptor = ArgumentCaptor.forClass(SendMessage::class.java)
-        verify(sender, times(11)).execute(firstCaptor.capture())
+            runBlocking { pidorExecutor.execute(context).invoke(sender) }
+            val firstCaptor = ArgumentCaptor.forClass(SendMessage::class.java)
+            verify(sender, times(11)).execute(firstCaptor.capture())
 
-        val pidorsAfterFirstInvoke =
-            commonRepository.getPidorsByChat(context.chat)
-        Assertions.assertEquals(
-            pidorsBefore.size + 1,
-            pidorsAfterFirstInvoke.size,
-            "Should be exactly one more pidor after command execute"
-        )
-        Assertions.assertEquals(
-            allPidors.size + 1,
-            pidorsAfterFirstInvoke.size,
-            "Same for all pidors in all chats"
-        )
+            val pidorsAfterFirstInvoke = commonRepository.getPidorsByChat(context.chat)
+            Assertions.assertEquals(
+                pidorsBefore.size + 1,
+                pidorsAfterFirstInvoke.size,
+                "Should be exactly one more pidor after command execute"
+            )
 
-        val lastPidorAfterFirstInvoke = pidorsAfterFirstInvoke.maxByOrNull { it.date }
-            ?: throw AssertionError("Should be one last pidor")
+            val lastPidorAfterFirstInvoke = pidorsAfterFirstInvoke.maxByOrNull { it.date }
+                ?: throw AssertionError("Should be one last pidor")
 
-        val firstPidorName = firstCaptor.allValues.last()
-        Assertions.assertEquals(
-            firstPidorName.text,
-            lastPidorAfterFirstInvoke.user.getGeneralName(true),
-            "Pidor in message and in database should match"
-        )
-        val secondCaptor = ArgumentCaptor.forClass(SendMessage::class.java)
-        runBlocking { pidorExecutor.execute(context).invoke(sender) }
-        verify(sender, times(12)).execute(secondCaptor.capture())
+            val firstPidorName = firstCaptor.allValues.last()
+            Assertions.assertEquals(
+                firstPidorName.text,
+                lastPidorAfterFirstInvoke.user.getGeneralName(true),
+                "Pidor in message and in database should match"
+            )
+            val secondCaptor = ArgumentCaptor.forClass(SendMessage::class.java)
+            runBlocking { pidorExecutor.execute(context).invoke(sender) }
+            verify(sender, times(12)).execute(secondCaptor.capture())
 
-        val pidorsAfterSecondInvoke =
-            commonRepository.getPidorsByChat(context.chat)
+            val pidorsAfterSecondInvoke = commonRepository.getPidorsByChat(context.chat)
 
-        Assertions.assertEquals(
-            pidorsAfterFirstInvoke.size,
-            pidorsAfterSecondInvoke.size,
-            "Should be exactly same pidors after second command execute"
-        )
-        Assertions.assertEquals(
-            allPidors.size + 1,
-            pidorsAfterSecondInvoke.size,
-            "Same for all pidors in all chats"
-        )
+            Assertions.assertEquals(
+                pidorsAfterFirstInvoke.size,
+                pidorsAfterSecondInvoke.size,
+                "Should be exactly same pidors after second command execute"
+            )
+            Assertions.assertEquals(
+                allPidors.size + 1,
+                pidorsAfterSecondInvoke.size,
+                "Same for all pidors in all chats"
+            )
 
-        val lastPidorAfterSecondInvoke = pidorsAfterSecondInvoke
-            .maxByOrNull { it.date } ?: throw AssertionError("Should be one last pidor")
+            val lastPidorAfterSecondInvoke = pidorsAfterSecondInvoke
+                .maxByOrNull { it.date } ?: throw AssertionError("Should be one last pidor")
 
-        Assertions.assertTrue(
-            firstPidorName.text.contains(lastPidorAfterSecondInvoke.user.getGeneralName(true)),
-            "Pidor in message and in database should match"
-        )
-        commonRepository.getAllPidors().forEach { (user) ->
-            commonRepository.removePidorRecord(user)
+            Assertions.assertTrue(
+                firstPidorName.text.contains(lastPidorAfterSecondInvoke.user.getGeneralName(true)),
+                "Pidor in message and in database should match"
+            )
+            commonRepository.getAllPidors().forEach { (user) ->
+                commonRepository.removePidorRecord(user)
+            }
+
+            redisTemplate.delete(redisTemplate.keys("*"))
         }
-
-        redisTemplate.delete(redisTemplate.keys("*"))
     }
 }

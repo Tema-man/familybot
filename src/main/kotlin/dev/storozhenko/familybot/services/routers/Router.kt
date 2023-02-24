@@ -1,11 +1,6 @@
 package dev.storozhenko.familybot.services.routers
 
-import dev.storozhenko.familybot.common.extensions.context
-import dev.storozhenko.familybot.common.extensions.key
-import dev.storozhenko.familybot.common.extensions.prettyFormat
-import dev.storozhenko.familybot.common.extensions.send
-import dev.storozhenko.familybot.common.extensions.toChat
-import dev.storozhenko.familybot.common.extensions.toUser
+import dev.storozhenko.familybot.common.extensions.*
 import dev.storozhenko.familybot.common.meteredCanExecute
 import dev.storozhenko.familybot.common.meteredExecute
 import dev.storozhenko.familybot.common.meteredPriority
@@ -24,19 +19,11 @@ import dev.storozhenko.familybot.repos.CommandHistoryRepository
 import dev.storozhenko.familybot.repos.CommonRepository
 import dev.storozhenko.familybot.repos.FunctionsConfigureRepository
 import dev.storozhenko.familybot.services.misc.RawUpdateLogger
-import dev.storozhenko.familybot.services.settings.CommandLimit
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.services.settings.FirstBotInteraction
-import dev.storozhenko.familybot.services.settings.FirstTimeInChat
-import dev.storozhenko.familybot.services.settings.MessageCounter
+import dev.storozhenko.familybot.services.settings.*
 import dev.storozhenko.familybot.services.talking.Dictionary
 import dev.storozhenko.familybot.telegram.BotConfig
 import io.micrometer.core.instrument.MeterRegistry
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -84,13 +71,7 @@ class Router(
             }
         }
         val context = update.context(botConfig, dictionary)
-
-        val executor = if (isGroup) {
-            selectExecutor(context) ?: selectRandom(context)
-        } else {
-            selectExecutor(context, forSingleUser = true) ?: return {}
-        }
-
+        val executor = selectExecutor(context, forSingleUser = !isGroup)
         logger.info("Executor to apply: ${executor.javaClass.simpleName}")
 
         return if (isExecutorDisabled(executor, context)) {
@@ -201,12 +182,13 @@ class Router(
     private fun selectExecutor(
         context: ExecutorContext,
         forSingleUser: Boolean = false
-    ): Executor? {
-        val executorsToProcess = if (forSingleUser) {
-            executors.filterIsInstance<PrivateMessageExecutor>()
-        } else {
-            executors.filterNot { it is PrivateMessageExecutor }
+    ): Executor {
+        val executorsToProcess = when {
+            context.isFromDeveloper -> executors
+            forSingleUser -> executors.filterIsInstance<PrivateMessageExecutor>()
+            else -> executors.filterNot { it is PrivateMessageExecutor }
         }
+
         return executorsToProcess
             .asSequence()
             .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
@@ -215,7 +197,7 @@ class Router(
             .map { (executor, _) -> executor }
             .find { executor ->
                 executor.meteredCanExecute(context, meterRegistry)
-            }
+            } ?: selectRandom(context)
     }
 
     private fun register(message: Message) {
@@ -242,6 +224,7 @@ class Router(
                     repository.changeUserActiveStatusNew(leftChatMember.toUser(chat = chat), false)
                 }
             }
+
             newChatMembers?.isNotEmpty() == true -> {
                 if (newChatMembers.any { it.isBot && it.userName == botConfig.botName }) {
                     logger.info("Bot was added to $chat")
@@ -253,6 +236,7 @@ class Router(
                         .forEach { repository.addUser(it.toUser(chat = chat)) }
                 }
             }
+
             message.from.isBot.not() || message.from.userName == "GroupAnonymousBot" -> {
                 repository.addUser(message.from.toUser(chat = chat))
             }

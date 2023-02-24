@@ -32,12 +32,12 @@ class AdvancedSettingsExecutor(
             }
         }
         return {
-            if (!it.isFromAdmin(context)) {
-                sendErrorMessage(
-                    context,
-                    context.phrase(Phrase.ADVANCED_SETTINGS_ADMIN_ONLY)
-                ).invoke(it)
-            } else {
+//            if (!it.isFromAdmin(context)) {
+//                sendErrorMessage(
+//                    context,
+//                    context.phrase(Phrase.ADVANCED_SETTINGS_ADMIN_ONLY)
+//                ).invoke(it)
+//            } else {
                 runCatching {
                     val processor = processors
                         .find { processor -> processor.canProcess(context) }
@@ -48,7 +48,7 @@ class AdvancedSettingsExecutor(
                     log.error("Advanced settings failed", throwable)
                     sendErrorMessage(context)
                 }.invoke(it)
-            }
+//            }
         }
     }
 
