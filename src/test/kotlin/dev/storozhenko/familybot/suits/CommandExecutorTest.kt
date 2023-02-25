@@ -1,10 +1,10 @@
 package dev.storozhenko.familybot.suits
 
-import dev.storozhenko.familybot.executors.command.CommandExecutor
+import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.infrastructure.createSimpleCommandContext
 import dev.storozhenko.familybot.infrastructure.createSimpleContext
 import dev.storozhenko.familybot.infrastructure.randomString
-import dev.storozhenko.familybot.models.router.Priority
+import dev.storozhenko.familybot.services.router.model.Priority
 import org.junit.jupiter.api.Assertions
 
 abstract class CommandExecutorTest : ExecutorTest() {

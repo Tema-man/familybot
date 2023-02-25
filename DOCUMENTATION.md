@@ -11,7 +11,7 @@ It accepts `Update`, which is being proceeded by some executor if there is one c
 #### 1.2 Diagram of Router logic
 
 The diagram below shows the Router's behaviour.
-![diagram](https://i.ibb.co/VtqzFW6/excalidraw-2020330164515.png)
+![diagram](readme_assets/architecture_diagram.png)
 
 For a better understanding of the diagram, it is necessary to talk about executors.
 

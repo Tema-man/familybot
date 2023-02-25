@@ -1,9 +1,9 @@
 package dev.storozhenko.familybot
 
-import dev.storozhenko.familybot.telegram.BotConfig
-import dev.storozhenko.familybot.telegram.BotConfigInjector
-import dev.storozhenko.familybot.telegram.BotStarter
-import dev.storozhenko.familybot.telegram.FamilyBot
+import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.telegram.BotConfigInjector
+import dev.storozhenko.familybot.core.telegram.BotStarter
+import dev.storozhenko.familybot.core.telegram.FamilyBot
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.Logger

@@ -1,13 +1,13 @@
 package dev.storozhenko.familybot.common.extensions
 
-import dev.storozhenko.familybot.models.Marriage
-import dev.storozhenko.familybot.models.askworld.AskWorldQuestion
-import dev.storozhenko.familybot.models.telegram.Chat
-import dev.storozhenko.familybot.models.telegram.Command
-import dev.storozhenko.familybot.models.telegram.CommandByUser
-import dev.storozhenko.familybot.models.telegram.Pidor
-import dev.storozhenko.familybot.models.telegram.User
-import dev.storozhenko.familybot.telegram.FamilyBot
+import dev.storozhenko.familybot.feature.marriage.model.Marriage
+import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestion
+import dev.storozhenko.familybot.core.telegram.model.Chat
+import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.telegram.model.CommandByUser
+import dev.storozhenko.familybot.core.telegram.model.Pidor
+import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.telegram.FamilyBot
 import java.sql.ResultSet
 import java.util.UUID
 

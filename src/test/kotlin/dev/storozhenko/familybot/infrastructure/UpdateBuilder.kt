@@ -1,14 +1,14 @@
 package dev.storozhenko.familybot.infrastructure
 
 import dev.storozhenko.familybot.common.extensions.context
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.models.telegram.Command
-import dev.storozhenko.familybot.models.telegram.stickers.Sticker
+import dev.storozhenko.familybot.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.telegram.stickers.Sticker
 import dev.storozhenko.familybot.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.services.settings.UkrainianLanguage
 import dev.storozhenko.familybot.services.talking.Dictionary
 import dev.storozhenko.familybot.services.talking.DictionaryReader
-import dev.storozhenko.familybot.telegram.BotConfig
+import dev.storozhenko.familybot.core.telegram.BotConfig
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock

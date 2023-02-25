@@ -1,9 +1,9 @@
 package dev.storozhenko.familybot.common
 
-import dev.storozhenko.familybot.executors.Executor
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.models.router.Priority
-import dev.storozhenko.familybot.telegram.FamilyBot
+import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.router.model.Priority
+import dev.storozhenko.familybot.core.telegram.FamilyBot
 import io.micrometer.core.instrument.MeterRegistry
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -15,7 +15,8 @@ fun Executor.meteredExecute(
         .timer("executors.${this::class.simpleName}.execute")
         .recordCallable {
             this.execute(context)
-        } ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
+        }
+        ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
 }
 
 fun Executor.meteredCanExecute(context: ExecutorContext, meterRegistry: MeterRegistry): Boolean {
@@ -23,7 +24,8 @@ fun Executor.meteredCanExecute(context: ExecutorContext, meterRegistry: MeterReg
         .timer("executors.${this::class.simpleName}.canExecute")
         .recordCallable {
             this.canExecute(context)
-        } ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
+        }
+        ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
 }
 
 fun Executor.meteredPriority(
@@ -34,5 +36,6 @@ fun Executor.meteredPriority(
         .timer("executors.${this::class.simpleName}.priority")
         .recordCallable {
             this.priority(context)
-        } ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
+        }
+        ?: throw FamilyBot.InternalException("Something has gone wrong while calling metered executor")
 }

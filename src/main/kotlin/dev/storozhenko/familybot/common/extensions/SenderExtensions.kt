@@ -1,11 +1,11 @@
 package dev.storozhenko.familybot.common.extensions
 
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.telegram.stickers.Sticker
+import dev.storozhenko.familybot.core.telegram.stickers.StickerPack
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.models.telegram.stickers.Sticker
-import dev.storozhenko.familybot.models.telegram.stickers.StickerPack
-import dev.storozhenko.familybot.telegram.BotConfig
-import dev.storozhenko.familybot.telegram.FamilyBot
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -19,13 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.User
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberBanned
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberLeft
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberMember
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner
-import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberRestricted
+import org.telegram.telegrambots.meta.api.objects.chatmember.*
 import org.telegram.telegrambots.meta.bots.AbsSender
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker as TelegramSticker
 
@@ -124,11 +118,11 @@ private suspend fun AbsSender.sendInternal(
 ): Message {
     SenderLogger.log.info(
         "Sending message, update=${update?.toJson() ?: "[N/A]"}, " +
-            "replyMessageId=$replyMessageId," +
-            "enableHtml=$enableHtml," +
-            "replyToUpdate=$replyToUpdate," +
-            "shouldTypeBeforeSend=$shouldTypeBeforeSend," +
-            "typeDelay=$typeDelay"
+                "replyMessageId=$replyMessageId," +
+                "enableHtml=$enableHtml," +
+                "replyToUpdate=$replyToUpdate," +
+                "shouldTypeBeforeSend=$shouldTypeBeforeSend," +
+                "typeDelay=$typeDelay"
     )
     if (shouldTypeBeforeSend) {
         this.execute(SendChatAction(chatId, "typing", null))
