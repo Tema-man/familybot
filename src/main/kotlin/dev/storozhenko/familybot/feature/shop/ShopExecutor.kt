@@ -26,8 +26,8 @@ class ShopExecutor(
             }
         }
 
-        return {
-            it.send(
+        return { sender ->
+            sender.send(
                 context,
                 context.phrase(Phrase.SHOP_KEYBOARD),
                 replyToUpdate = true,
@@ -36,9 +36,7 @@ class ShopExecutor(
         }
     }
 
-    private fun customization(context: ExecutorContext): SendMessage.() -> Unit {
-        return {
-            replyMarkup = ShopItem.toKeyBoard(context)
-        }
+    private fun customization(context: ExecutorContext): SendMessage.() -> Unit = {
+        replyMarkup = ShopItem.toKeyBoard(context)
     }
 }

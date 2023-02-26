@@ -14,9 +14,8 @@ const val QUOTE_MESSAGE = "Тег?"
 
 @Component
 class QuoteByTagExecutor(private val quoteRepository: QuoteRepository) : CommandExecutor() {
-    override fun command(): Command {
-        return Command.QUOTE_BY_TAG
-    }
+
+    override fun command() = Command.QUOTE_BY_TAG
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return {

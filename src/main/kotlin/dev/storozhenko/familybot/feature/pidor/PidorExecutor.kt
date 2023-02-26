@@ -37,11 +37,12 @@ class PidorExecutor(
     private val botConfig: BotConfig,
     private val dictionary: Dictionary
 ) : CommandExecutor(), Configurable {
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.PIDOR
-    }
 
     private val log = getLogger()
+
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
+
+    override fun command(): Command = Command.PIDOR
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val chat = context.chat
@@ -170,10 +171,6 @@ class PidorExecutor(
         }
     }
 
-    override fun command(): Command {
-        return Command.PIDOR
-    }
-
     private fun getMessageForPidors(chat: Chat, key: ChatEasyKey): SendMessage? {
         val pidorsByChat: List<List<Pidor>> = repository
             .getPidorsByChat(chat)
@@ -186,14 +183,14 @@ class PidorExecutor(
                 SendMessage(
                     chat.idString,
                     dictionary.get(Phrase.PIROR_DISCOVERED_ONE, key) + " " +
-                            formatName(pidorsByChat.first(), key)
+                        formatName(pidorsByChat.first(), key)
                 ).apply { enableHtml(true) }
             }
 
             else -> SendMessage(
                 chat.idString,
                 dictionary.get(Phrase.PIROR_DISCOVERED_MANY, key) + " " +
-                        pidorsByChat.joinToString { formatName(it, key) }
+                    pidorsByChat.joinToString { formatName(it, key) }
             ).apply { enableHtml(true) }
         }
     }

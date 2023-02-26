@@ -11,15 +11,9 @@ data class ShopPayload(
     @JsonProperty("shopItem") val shopItem: ShopItem
 ) {
 
-    fun chatKey(): ChatEasyKey {
-        return ChatEasyKey(this.chatId)
-    }
+    fun chatKey() = ChatEasyKey(this.chatId)
 
-    fun userAndChatKey(): UserAndChatEasyKey {
-        return UserAndChatEasyKey(this.userId, this.chatId)
-    }
+    fun userAndChatKey() = UserAndChatEasyKey(this.userId, this.chatId)
 
-    fun userKey(): UserEasyKey {
-        return UserEasyKey(this.userId)
-    }
+    fun userKey() = UserEasyKey(this.userId)
 }

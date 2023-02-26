@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.settings
 
 import dev.storozhenko.familybot.common.extensions.isFromAdmin
 import dev.storozhenko.familybot.common.extensions.toEmoji
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
@@ -17,10 +17,10 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class SettingsContiniousExecutor(
+class SettingsContinuousExecutor(
     private val configureRepository: FunctionsConfigureRepository,
     botConfig: BotConfig
-) : ContiniousConversationExecutor(botConfig) {
+) : ContinuousConversationExecutor(botConfig) {
     private val log = getLogger()
     override fun command(): Command {
         return Command.SETTINGS

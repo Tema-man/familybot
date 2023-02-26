@@ -17,13 +17,10 @@ import java.time.LocalDate
 class PidorStatsYearExecutor(
     private val repository: CommonRepository
 ) : CommandExecutor(), Configurable {
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.PIDOR
-    }
 
-    override fun command(): Command {
-        return Command.STATS_YEAR
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
+
+    override fun command() = Command.STATS_YEAR
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val now = LocalDate.now()

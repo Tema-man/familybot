@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class LogsExecutor(botConfig: BotConfig) : OnlyBotOwnerExecutor(botConfig) {
+
     override fun getMessagePrefix() = "logs"
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {

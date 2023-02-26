@@ -23,15 +23,17 @@ object CommandLimit : LongKeyType<UserAndChatEasyKey>
 object FirstBotInteraction : StringKeyType<ChatEasyKey>
 object FirstTimeInChat : BooleanKeyType<ChatEasyKey>
 object RageTolerance : BooleanKeyType<ChatEasyKey>
-object PidorTolerance : LongKeyType<ChatEasyKey>
-object BetTolerance : BooleanKeyType<UserAndChatEasyKey>
-object AskWorldChatUsages : LongKeyType<ChatEasyKey>
 object AskWorldUserUsages : LongKeyType<UserEasyKey>
 object FuckOffOverride : BooleanKeyType<ChatEasyKey>
 object PshenitsinTolerance : BooleanKeyType<ChatEasyKey>
 object ProposalTo : LongKeyType<UserAndChatEasyKey>
 object MessageCounter : LongKeyType<UserAndChatEasyKey>
-object PickPidorAbilityCount : LongKeyType<UserEasyKey>
-object AutoPidorTimesLeft : LongKeyType<ChatEasyKey>
 object TikTokDownload : BooleanKeyType<ChatEasyKey>
 object BotOwnerPidorSkip : BooleanKeyType<ChatEasyKey>
+
+// available in shop
+object AskWorldChatUsages : LongKeyType<ChatEasyKey>
+object AutoPidorTimesLeft : LongKeyType<ChatEasyKey>
+object BetTolerance : BooleanKeyType<UserAndChatEasyKey>
+object PickPidorAbilityCount : LongKeyType<UserEasyKey>
+object PidorTolerance : LongKeyType<ChatEasyKey>

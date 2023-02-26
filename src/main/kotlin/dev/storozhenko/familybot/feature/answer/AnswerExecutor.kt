@@ -14,11 +14,11 @@ import java.util.regex.Pattern
 
 @Component
 class AnswerExecutor : CommandExecutor() {
+
     private val log = getLogger()
     private val orPattern = Pattern.compile(" (или|або) ")
-    override fun command(): Command {
-        return Command.ANSWER
-    }
+
+    override fun command() = Command.ANSWER
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val text = context.message.text

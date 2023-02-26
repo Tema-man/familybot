@@ -29,9 +29,7 @@ class MeCommandExecutor(
     private val easyKeyValueService: EasyKeyValueService
 ) : CommandExecutor() {
 
-    override fun command(): Command {
-        return Command.ME
-    }
+    override fun command() = Command.ME
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val chat = context.chat

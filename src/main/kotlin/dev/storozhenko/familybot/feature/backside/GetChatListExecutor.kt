@@ -28,11 +28,7 @@ class GetChatListExecutor(
         }
     }
 
-    private fun calculate(
-        sender: AbsSender,
-        chat: Chat
-    ): Int {
-        return runCatching { sender.execute(GetChatMemberCount(chat.idString)) }
-            .getOrElse { 0 }
-    }
+    private fun calculate(sender: AbsSender, chat: Chat): Int = runCatching {
+        sender.execute(GetChatMemberCount(chat.idString))
+    }.getOrElse { 0 }
 }

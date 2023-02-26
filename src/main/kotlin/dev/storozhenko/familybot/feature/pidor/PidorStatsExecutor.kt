@@ -19,9 +19,9 @@ class PidorStatsExecutor(
     private val repository: CommonRepository
 ) : CommandExecutor(), Configurable {
 
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.PIDOR
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
+
+    override fun command() = Command.STATS_TOTAL
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val chat = context.chat
@@ -40,9 +40,5 @@ class PidorStatsExecutor(
         return {
             it.send(context, title + pidorsByChat.joinToString("\n"), enableHtml = true)
         }
-    }
-
-    override fun command(): Command {
-        return Command.STATS_TOTAL
     }
 }

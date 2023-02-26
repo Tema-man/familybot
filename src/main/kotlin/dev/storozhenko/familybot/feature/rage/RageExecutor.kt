@@ -28,13 +28,9 @@ class RageExecutor(
         const val AMOUNT_OF_RAGE_MESSAGES = 20L
     }
 
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.RAGE
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.RAGE
 
-    override fun command(): Command {
-        return Command.RAGE
-    }
+    override fun command() = Command.RAGE
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val key = context.chatKey
@@ -74,18 +70,12 @@ class RageExecutor(
         }
     }
 
-    private fun isCooldown(context: ExecutorContext): Boolean {
-        return easyKeyValueService.get(RageTolerance, context.chatKey, false)
-    }
+    private fun isCooldown(context: ExecutorContext): Boolean =
+        easyKeyValueService.get(RageTolerance, context.chatKey, false)
 
-    private fun isFirstLaunch(context: ExecutorContext): Boolean {
-        return easyKeyValueService.get(FirstTimeInChat, context.chatKey, false)
-    }
+    private fun isFirstLaunch(context: ExecutorContext): Boolean =
+        easyKeyValueService.get(FirstTimeInChat, context.chatKey, false)
 
-    private fun isRageForced(context: ExecutorContext): Boolean {
-        return context.message.text.contains(
-            "FORCED" +
-                    context.user.id.toString().takeLast(4)
-        )
-    }
+    private fun isRageForced(context: ExecutorContext): Boolean =
+        context.message.text.contains("FORCED" + context.user.id.toString().takeLast(4))
 }

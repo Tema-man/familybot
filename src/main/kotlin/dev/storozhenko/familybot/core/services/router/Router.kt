@@ -105,7 +105,7 @@ class Router(
             logChatMessage(context)
         }
         val executor = executors
-            .filter { it.meteredPriority(context, meterRegistry) == Priority.RANDOM }
+            .filter { it.meteredPriority(context, meterRegistry) == Priority.LOWEST }
             .random()
 
         logger.info("Random priority executor ${executor.javaClass.simpleName} was selected")
@@ -198,8 +198,8 @@ class Router(
         return executorsToProcess
             .asSequence()
             .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
-            .filter { (_, priority) -> priority higherThan Priority.RANDOM }
-            .sortedByDescending { (_, priority) -> priority.priorityValue }
+            .filter { (_, priority) -> priority higherThan Priority.LOWEST }
+            .sortedByDescending { (_, priority) -> priority.score }
             .map { (executor, _) -> executor }
             .find { executor ->
                 executor.meteredCanExecute(context, meterRegistry)

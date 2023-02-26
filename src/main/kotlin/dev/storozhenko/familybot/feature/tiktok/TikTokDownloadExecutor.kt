@@ -40,11 +40,10 @@ class TikTokDownloadExecutor(
         }
     }
 
-    override fun canExecute(context: ExecutorContext): Boolean {
-        return botConfig.ytdlLocation != null &&
-                getTikTokUrls(context).isNotEmpty() &&
-                easyKeyValueService.get(TikTokDownload, context.chatKey, false)
-    }
+    override fun canExecute(context: ExecutorContext): Boolean =
+        botConfig.ytdlLocation != null &&
+            getTikTokUrls(context).isNotEmpty() &&
+            easyKeyValueService.get(TikTokDownload, context.chatKey, false)
 
     override fun priority(context: ExecutorContext) = Priority.HIGH
 
@@ -70,9 +69,7 @@ class TikTokDownloadExecutor(
         return File(filename)
     }
 
-    private fun containsUrl(text: String): Boolean {
-        return text.contains("instagram.com/reel/", ignoreCase = true)
-                || text.contains("tiktok", ignoreCase = true)
-
-    }
+    private fun containsUrl(text: String): Boolean =
+        text.contains("instagram.com/reel/", ignoreCase = true)
+            || text.contains("tiktok", ignoreCase = true)
 }

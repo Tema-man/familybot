@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.scenario
 
 import dev.storozhenko.familybot.common.extensions.isFromAdmin
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.telegram.BotConfig
@@ -14,12 +14,12 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class ScenarioContiniousExecutor(
+class ScenarioContinuousExecutor(
     private val scenarioSessionManagementService: ScenarioSessionManagementService,
     private val scenarioService: ScenarioService,
     botConfig: BotConfig
 ) :
-    ContiniousConversationExecutor(botConfig) {
+    ContinuousConversationExecutor(botConfig) {
     override fun getDialogMessages(context: ExecutorContext) =
         context.allPhrases(Phrase.SCENARIO_CHOOSE)
 

@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.bet
 
 import dev.storozhenko.familybot.common.extensions.send
 import dev.storozhenko.familybot.common.extensions.untilNextMonth
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.BetTolerance
@@ -25,12 +25,12 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Component
-class BetContiniousExecutor(
+class BetContinuousExecutor(
     private val pidorRepository: CommonRepository,
     private val pidorCompetitionService: PidorCompetitionService,
     private val easyKeyValueService: EasyKeyValueService,
     private val botConfig: BotConfig
-) : ContiniousConversationExecutor(botConfig) {
+) : ContinuousConversationExecutor(botConfig) {
     private val diceNumbers = listOf(1, 2, 3, 4, 5, 6)
 
     override fun getDialogMessages(context: ExecutorContext): Set<String> {

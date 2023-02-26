@@ -24,17 +24,11 @@ class TopPidorsByMonthsExecutor(
     private val commonRepository: CommonRepository
 ) : CommandExecutor(), Configurable {
 
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.PIDOR
-    }
-
-    private class PidorStat(val user: User, val position: Int)
-
     private val delimiter = "\n========================\n"
 
-    override fun command(): Command {
-        return Command.LEADERBOARD
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
+
+    override fun command() = Command.LEADERBOARD
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val result = commonRepository
@@ -93,4 +87,6 @@ class TopPidorsByMonthsExecutor(
             Pluralization.MANY -> context.phrase(Phrase.PLURALIZED_LEADERBOARD_MANY)
         }
     }
+
+    private class PidorStat(val user: User, val position: Int)
 }

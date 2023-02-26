@@ -21,21 +21,11 @@ class TalkingExecutor(
     private val easyKeyValueService: EasyKeyValueService
 ) : Executor, Configurable {
 
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return if (isRageModeEnabled(context)) {
-            FunctionId.RAGE
-        } else {
-            FunctionId.CHATTING
-        }
-    }
+    override fun getFunctionId(context: ExecutorContext) =
+        if (isRageModeEnabled(context)) FunctionId.RAGE else FunctionId.CHATTING
 
-    override fun priority(context: ExecutorContext): Priority {
-        return if (isRageModeEnabled(context)) {
-            Priority.HIGH
-        } else {
-            Priority.RANDOM
-        }
-    }
+    override fun priority(context: ExecutorContext) =
+        if (isRageModeEnabled(context)) Priority.HIGHEST else Priority.LOW
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val rageModEnabled = isRageModeEnabled(context)

@@ -1,14 +1,12 @@
 package dev.storozhenko.familybot.core.services.router.model
 
-enum class Priority(val priorityValue: Int) {
+enum class Priority(val score: Byte) {
 
-    HIGH(1),
+    HIGHEST(Byte.MAX_VALUE),
+    HIGH(64),
     MEDIUM(0),
-    LOW(-1),
-    VERY_LOW(-2),
-    RANDOM(-1000);
+    LOW(-64),
+    LOWEST(Byte.MIN_VALUE);
 
-    infix fun higherThan(other: Priority): Boolean {
-        return this.priorityValue > other.priorityValue
-    }
+    infix fun higherThan(other: Priority): Boolean = this.score > other.score
 }

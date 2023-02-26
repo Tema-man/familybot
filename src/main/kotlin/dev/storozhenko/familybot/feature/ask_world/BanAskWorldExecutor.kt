@@ -18,6 +18,7 @@ class BanAskWorldExecutor(
     private val banService: BanService
 ) : CommandExecutor() {
     private val log = getLogger()
+
     override fun command() = Command.BAN
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
@@ -43,9 +44,7 @@ class BanAskWorldExecutor(
         }
     }
 
-    override fun canExecute(context: ExecutorContext): Boolean {
-        return context.isFromDeveloper && super.canExecute(context)
-    }
+    override fun canExecute(context: ExecutorContext) = context.isFromDeveloper && super.canExecute(context)
 
     private fun ban(
         context: ExecutorContext,

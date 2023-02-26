@@ -17,9 +17,10 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 class AntiDdosExecutor(
     private val easyKeyValueService: EasyKeyValueService
 ) : Executor, Configurable {
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.ANTIDDOS
-    }
+
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.ANTIDDOS
+
+    override fun priority(context: ExecutorContext) = Priority.HIGHEST
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val update = context.update
@@ -31,17 +32,10 @@ class AntiDdosExecutor(
         }
     }
 
-    override fun canExecute(context: ExecutorContext): Boolean {
-        return if (context.command != null) {
-            easyKeyValueService.get(CommandLimit, context.userAndChatKey, 0) >= 5
-        } else {
-            false
-        }
-    }
-
-    override fun priority(context: ExecutorContext): Priority {
-        return Priority.HIGH
-    }
+    override fun canExecute(context: ExecutorContext): Boolean =
+        context.command
+            ?.let { easyKeyValueService.get(CommandLimit, context.userAndChatKey, 0) >= 5 }
+            ?: false
 
     private fun messageCase(
         context: ExecutorContext,
@@ -58,7 +52,6 @@ class AntiDdosExecutor(
                     showAlert = true
                     text = message
                 }
-
         )
     }
 }

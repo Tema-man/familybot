@@ -14,8 +14,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 class CustomMessageExecutor(
     private val commonRepository: CommonRepository,
     botConfig: BotConfig
-) :
-    OnlyBotOwnerExecutor(botConfig) {
+) : OnlyBotOwnerExecutor(botConfig) {
+
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val tokens = context.update.getMessageTokens(delimiter = "|")
 

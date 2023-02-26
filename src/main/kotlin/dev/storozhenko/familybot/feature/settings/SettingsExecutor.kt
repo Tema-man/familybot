@@ -16,9 +16,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 class SettingsExecutor(
     private val configureRepository: FunctionsConfigureRepository
 ) : CommandExecutor() {
-    override fun command(): Command {
-        return Command.SETTINGS
-    }
+
+    override fun command() = Command.SETTINGS
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return {

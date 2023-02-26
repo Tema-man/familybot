@@ -13,9 +13,14 @@ import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class UserEnterExitExecutor(private val botConfig: BotConfig) :
-    Executor,
-    Configurable {
+class UserEnterExitExecutor(
+    private val botConfig: BotConfig
+) : Executor, Configurable {
+
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.GREETINGS
+
+    override fun priority(context: ExecutorContext) = Priority.LOW
+
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val message = context.message
         val phrase = when {
@@ -36,12 +41,9 @@ class UserEnterExitExecutor(private val botConfig: BotConfig) :
     override fun canExecute(context: ExecutorContext) =
         isUserLeft(context.message) || isUserEntered(context.message)
 
-    override fun priority(context: ExecutorContext) = Priority.LOW
-
     private fun isUserLeft(message: Message) = message.leftChatMember != null
     private fun isUserEntered(message: Message) = message.newChatMembers?.isNotEmpty() ?: false
     private fun isNewChat(message: Message) =
         message.newChatMembers.any { it.isBot && it.userName == botConfig.botName }
 
-    override fun getFunctionId(context: ExecutorContext) = FunctionId.GREETINGS
 }

@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.quote
 
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.core.telegram.model.Command
@@ -10,31 +10,24 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class QuoteContiniousExecutor(
+class QuoteContinuousExecutor(
     private val quoteRepository: QuoteRepository,
     botConfig: BotConfig
-) : ContiniousConversationExecutor(botConfig) {
+) : ContinuousConversationExecutor(botConfig) {
 
-    override fun command(): Command {
-        return Command.QUOTE_BY_TAG
-    }
+    override fun command() = Command.QUOTE_BY_TAG
 
-    override fun getDialogMessages(context: ExecutorContext): Set<String> {
-        return setOf(QUOTE_MESSAGE)
-    }
+    override fun getDialogMessages(context: ExecutorContext): Set<String> = setOf(QUOTE_MESSAGE)
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return {
             val callbackQuery = context.update.callbackQuery
             it.execute(AnswerCallbackQuery(callbackQuery.id))
             it.execute(
-                (
-                        SendMessage(
-                            callbackQuery.message.chatId.toString(),
-                            quoteRepository.getByTag(callbackQuery.data)
-                                ?: "Такого тега нет, идите нахуй"
-                        )
-                        )
+                SendMessage(
+                    callbackQuery.message.chatId.toString(),
+                    quoteRepository.getByTag(callbackQuery.data) ?: "Такого тега нет, идите нахуй"
+                )
             )
         }
     }

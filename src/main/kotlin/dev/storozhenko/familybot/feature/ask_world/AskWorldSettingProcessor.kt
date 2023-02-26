@@ -18,9 +18,8 @@ class AskWorldSettingProcessor(
     private val functionsConfigureRepository: FunctionsConfigureRepository
 ) : SettingProcessor {
 
-    override fun canProcess(context: ExecutorContext): Boolean {
-        return context.update.getMessageTokens()[1] == "вопросики"
-    }
+    override fun canProcess(context: ExecutorContext): Boolean =
+        context.update.getMessageTokens()[1] == "вопросики"
 
     override fun process(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val arg = context.update.getMessageTokens()[2]

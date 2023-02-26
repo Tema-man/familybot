@@ -21,12 +21,10 @@ class TopHistoryExecutor : CommandExecutor() {
         ?.parseJson<Mamoeb>()
         ?: throw FamilyBot.InternalException("curses is missing")
 
-    override fun command(): Command {
-        return Command.TOP_HISTORY
-    }
+    override fun command(): Command = Command.TOP_HISTORY
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
-        return { sender -> sender.send(context, mamoeb.curses.random()) }
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit = { sender ->
+        sender.send(context, mamoeb.curses.random())
     }
 }
 

@@ -18,13 +18,9 @@ class PidorStatsMonthExecutor(
     private val repository: CommonRepository
 ) : CommandExecutor(), Configurable {
 
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.PIDOR
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    override fun command(): Command {
-        return Command.STATS_MONTH
-    }
+    override fun command() = Command.STATS_MONTH
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val now = LocalDate.now()

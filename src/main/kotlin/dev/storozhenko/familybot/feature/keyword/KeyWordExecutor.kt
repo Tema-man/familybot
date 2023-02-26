@@ -21,9 +21,8 @@ class KeyWordExecutor(val processors: List<KeyWordProcessor>) : Executor, Config
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.TALK_BACK
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
-        return processorsForMessage.remove(context.message.messageId)?.process(context) ?: {}
-    }
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit =
+        processorsForMessage.remove(context.message.messageId)?.process(context) ?: {}
 
     override fun canExecute(context: ExecutorContext): Boolean {
         val message = context.message
@@ -42,14 +41,6 @@ class KeyWordExecutor(val processors: List<KeyWordProcessor>) : Executor, Config
         }
     }
 
-    private fun isPassingRandomCheck(
-        processor: KeyWordProcessor,
-        context: ExecutorContext
-    ): Boolean {
-        return if (processor.isRandom(context)) {
-            randomInt(0, 5) == 0
-        } else {
-            true
-        }
-    }
+    private fun isPassingRandomCheck(processor: KeyWordProcessor, context: ExecutorContext): Boolean =
+        if (processor.isRandom(context)) randomInt(0, 5) == 0 else true
 }

@@ -5,17 +5,11 @@ import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.telegram.model.Command
 
 abstract class CommandExecutor : Executor {
-  override fun canExecute(context: ExecutorContext): Boolean {
-    return command() == context.command
-  }
+    override fun canExecute(context: ExecutorContext): Boolean = command() == context.command
 
-  override fun priority(context: ExecutorContext): Priority {
-    return Priority.MEDIUM
-  }
+    override fun priority(context: ExecutorContext): Priority = Priority.MEDIUM
 
-  open fun isLoggable(): Boolean {
-    return true
-  }
+    open fun isLoggable(): Boolean = true
 
-  abstract fun command(): Command
+    abstract fun command(): Command
 }

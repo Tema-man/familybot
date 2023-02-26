@@ -9,11 +9,10 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class QuoteExecutor(private val quoteRepository: QuoteRepository) : CommandExecutor() {
-    override fun command(): Command {
-        return Command.QUOTE
-    }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
-        return { it.send(context, quoteRepository.getRandom()) }
+    override fun command() = Command.QUOTE
+
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit = {
+        it.send(context, quoteRepository.getRandom())
     }
 }

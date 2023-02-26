@@ -17,9 +17,7 @@ class CommandStatExecutor(
     private val repositoryCommand: CommandHistoryRepository
 ) : CommandExecutor() {
 
-    override fun command(): Command {
-        return Command.COMMAND_STATS
-    }
+    override fun command() = Command.COMMAND_STATS
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val all = repositoryCommand.getAll(context.chat).groupBy(CommandByUser::command)

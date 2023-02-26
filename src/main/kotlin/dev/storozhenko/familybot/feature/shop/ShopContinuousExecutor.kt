@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.shop
 
 import dev.storozhenko.familybot.common.extensions.rubles
 import dev.storozhenko.familybot.common.extensions.toJson
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.telegram.BotConfig
@@ -16,13 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.payments.LabeledPrice
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class ShopContiniousExecutor(
+class ShopContinuousExecutor(
     private val botConfig: BotConfig
-) : ContiniousConversationExecutor(botConfig) {
+) : ContinuousConversationExecutor(botConfig) {
 
-    override fun getDialogMessages(context: ExecutorContext): Set<String> {
-        return context.allPhrases(Phrase.SHOP_KEYBOARD)
-    }
+    override fun getDialogMessages(context: ExecutorContext): Set<String> =
+        context.allPhrases(Phrase.SHOP_KEYBOARD)
 
     override fun command() = Command.SHOP
 
@@ -55,11 +54,12 @@ class ShopContiniousExecutor(
         }
     }
 
-    private fun createPayload(context: ExecutorContext, shopItem: ShopItem): String {
-        return ShopPayload(
-            context.chat.id,
-            context.user.id,
-            shopItem
-        ).toJson()
-    }
+    private fun createPayload(
+        context: ExecutorContext,
+        shopItem: ShopItem
+    ): String = ShopPayload(
+        context.chat.id,
+        context.user.id,
+        shopItem
+    ).toJson()
 }

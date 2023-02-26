@@ -22,7 +22,11 @@ class VestnikCommandExecutor(
     private val translateService: TranslateService,
     private val easyKeyValueService: EasyKeyValueService
 ) : CommandExecutor() {
+
     private val chat = Chat(id = -1001351771258L, name = null)
+
+    override fun command() = Command.VESTNIK
+
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return { sender ->
             val question = coroutineScope {
@@ -44,6 +48,4 @@ class VestnikCommandExecutor(
             sender.sendDeferred(context, question, shouldTypeBeforeSend = true)
         }
     }
-
-    override fun command() = Command.VESTNIK
 }

@@ -40,13 +40,10 @@ class AskWorldInitialExecutor(
     private val easyKeyValueService: EasyKeyValueService
 ) : CommandExecutor(), Configurable {
     private val log = getLogger()
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.ASK_WORLD
-    }
 
-    override fun command(): Command {
-        return Command.ASK_WORLD
-    }
+    override fun getFunctionId(context: ExecutorContext) = FunctionId.ASK_WORLD
+
+    override fun command() = Command.ASK_WORLD
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val currentChat = context.chat
@@ -115,6 +112,7 @@ class AskWorldInitialExecutor(
                 } else {
                     easyKeyValueService.increment(AskWorldChatUsages, chatKey)
                 }
+
                 if (userUsages == null) {
                     easyKeyValueService.put(AskWorldUserUsages, userEasyKey, 1, untilNextDay())
                 } else {
@@ -167,9 +165,9 @@ class AskWorldInitialExecutor(
 
             val isScam =
                 shouldBeCensored(message) ||
-                        shouldBeCensored(context.chat.name ?: "") ||
-                        isSpam(message) ||
-                        containsLongWords(message)
+                    shouldBeCensored(context.chat.name ?: "") ||
+                    isSpam(message) ||
+                    containsLongWords(message)
 
             if (message.length > 2000) {
                 return ValidationError {
@@ -252,16 +250,16 @@ class AskWorldInitialExecutor(
 
     private fun shouldBeCensored(message: String): Boolean {
         return message.contains("http", ignoreCase = true) ||
-                message.contains("www", ignoreCase = true) ||
-                message.contains("jpg", ignoreCase = true) ||
-                message.contains("png", ignoreCase = true) ||
-                message.contains("jpeg", ignoreCase = true) ||
-                message.contains("bmp", ignoreCase = true) ||
-                message.contains("gif", ignoreCase = true) ||
-                message.contains("_bot", ignoreCase = true) ||
-                message.contains("t.me", ignoreCase = true) ||
-                message.contains("Bot", ignoreCase = false) ||
-                message.contains("@")
+            message.contains("www", ignoreCase = true) ||
+            message.contains("jpg", ignoreCase = true) ||
+            message.contains("png", ignoreCase = true) ||
+            message.contains("jpeg", ignoreCase = true) ||
+            message.contains("bmp", ignoreCase = true) ||
+            message.contains("gif", ignoreCase = true) ||
+            message.contains("_bot", ignoreCase = true) ||
+            message.contains("t.me", ignoreCase = true) ||
+            message.contains("Bot", ignoreCase = false) ||
+            message.contains("@")
     }
 
     private fun isSpam(message: String): Boolean {

@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.bet
 
 import dev.storozhenko.familybot.common.extensions.randomInt
-import dev.storozhenko.familybot.core.executor.ContiniousConversationExecutor
+import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.telegram.BotConfig
@@ -19,13 +19,13 @@ import java.time.Instant
 
 @Component
 @Deprecated(message = "Replaced with BetContinious")
-class RouletteContiniousExecutor(
+class RouletteContinuousExecutor(
     private val botConfig: BotConfig,
     private val pidorRepository: CommonRepository,
     private val pidorCompetitionService: PidorCompetitionService
-) : ContiniousConversationExecutor(botConfig) {
+) : ContinuousConversationExecutor(botConfig) {
 
-    private val log = LoggerFactory.getLogger(RouletteContiniousExecutor::class.java)
+    private val log = LoggerFactory.getLogger(RouletteContinuousExecutor::class.java)
 
     override fun getDialogMessages(context: ExecutorContext): Set<String> {
         return setOf(ROULETTE_MESSAGE)

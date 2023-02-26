@@ -4,13 +4,13 @@ import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.telegram.BotConfig
 
-abstract class OnlyBotOwnerExecutor(private val botConfig: BotConfig) : PrivateMessageExecutor {
+abstract class ContinuousConversationExecutor(private val config: BotConfig) : CommandExecutor() {
+
+    override fun priority(context: ExecutorContext): Priority = Priority.MEDIUM
 
     override fun canExecute(context: ExecutorContext): Boolean = with(context.message) {
-        from.userName == botConfig.developer && text.startsWith(getMessagePrefix(), ignoreCase = true)
+        from.userName == config.botName && (text ?: "") in getDialogMessages(context)
     }
 
-    override fun priority(context: ExecutorContext) = Priority.HIGH
-
-    abstract fun getMessagePrefix(): String
+    abstract fun getDialogMessages(context: ExecutorContext): Set<String>
 }
