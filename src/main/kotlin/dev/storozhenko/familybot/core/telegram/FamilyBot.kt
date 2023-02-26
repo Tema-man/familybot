@@ -15,7 +15,6 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.bots.AbsSender
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException
 
 @Component
@@ -24,47 +23,64 @@ class FamilyBot(
     val router: Router,
     val pollRouter: PollRouter,
     val paymentRouter: PaymentRouter
-) : TelegramLongPollingBot() {
+) : TelegramLongPollingBot(config.botToken) {
 
     private val log = LoggerFactory.getLogger(FamilyBot::class.java)
     private val routerScope = CoroutineScope(Dispatchers.Default)
     private val channels = HashMap<Long, Channel<Update>>()
 
-    override fun getBotToken(): String {
-        return config.botToken
-    }
+    override fun getBotUsername(): String = config.botName
 
     override fun onUpdateReceived(tgUpdate: Update?) {
         val update = tgUpdate ?: throw InternalException("Update should not be null")
-        if (update.hasPollAnswer()) {
-            routerScope.launch { proceedPollAnswer(update) }
-            return
-        }
 
-        if (update.hasPreCheckoutQuery()) {
-            routerScope.launch { proceedPreCheckoutQuery(update).invoke(this@FamilyBot) }
-            return
-        }
-
-        if (update.message?.hasSuccessfulPayment() == true) {
-            routerScope.launch { proceedSuccessfulPayment(update).invoke(this@FamilyBot) }
-            return
-        }
-
-        if (update.hasPoll()) {
-            return
-        }
-        if (update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage()) {
-            val chat = update.toChat()
-
-            val channel = channels.computeIfAbsent(chat.id) { createChannel() }
-
-            routerScope.launch { channel.send(update) }
+        when {
+            update.hasPollAnswer() -> proceedPollAnswer(update)
+            update.hasPreCheckoutQuery() -> proceedPreCheckoutQuery(update)
+            update.message?.hasSuccessfulPayment() == true -> proceedSuccessfulPayment(update)
+            update.run { hasMessage() || hasCallbackQuery() || hasEditedMessage() } -> proceedMessage(update)
+            update.hasPoll() -> {}
         }
     }
 
-    override fun getBotUsername(): String {
-        return config.botName
+    private fun proceedPollAnswer(update: Update) = routerScope.launch {
+        runCatching {
+            pollRouter.proceed(update)
+        }.onFailure {
+            log.warn("pollRouter.proceed failed", it)
+        }
+    }
+
+    private fun proceedPreCheckoutQuery(update: Update) = routerScope.launch {
+        runCatching {
+            paymentRouter.proceedPreCheckoutQuery(update)
+        }.onFailure {
+            log.error("paymentRouter.proceedPreCheckoutQuery failed", it)
+        }.getOrDefault { }(this@FamilyBot)
+    }
+
+    private fun proceedSuccessfulPayment(update: Update) = routerScope.launch {
+        runCatching {
+            paymentRouter.proceedSuccessfulPayment(update)
+        }.onFailure {
+            log.warn("paymentRouter.proceedSuccessfulPayment failed", it)
+        }.getOrDefault { }(this@FamilyBot)
+    }
+
+    private fun proceedMessage(update: Update) = routerScope.launch {
+        val chat = update.toChat()
+        val channel = channels.computeIfAbsent(chat.id) { createChannel() }
+        channel.send(update)
+    }
+
+    private fun createChannel(): Channel<Update> {
+        val channel = Channel<Update>()
+        routerScope.launch {
+            for (incomingUpdate in channel) {
+                proceed(incomingUpdate)
+            }
+        }
+        return channel
     }
 
     private suspend fun proceed(update: Update) {
@@ -86,40 +102,6 @@ class FamilyBot(
         } finally {
             MDC.clear()
         }
-    }
-
-    private fun proceedPollAnswer(update: Update) {
-        runCatching {
-            pollRouter.proceed(update)
-        }.onFailure {
-            log.warn("pollRouter.proceed failed", it)
-        }
-    }
-
-    private fun proceedPreCheckoutQuery(update: Update): suspend (AbsSender) -> Unit {
-        return runCatching {
-            paymentRouter.proceedPreCheckoutQuery(update)
-        }.onFailure {
-            log.error("paymentRouter.proceedPreCheckoutQuery failed", it)
-        }.getOrDefault { }
-    }
-
-    private fun proceedSuccessfulPayment(update: Update): suspend (AbsSender) -> Unit {
-        return runCatching {
-            paymentRouter.proceedSuccessfulPayment(update)
-        }.onFailure {
-            log.warn("paymentRouter.proceedSuccessfulPayment failed", it)
-        }.getOrDefault { }
-    }
-
-    private fun createChannel(): Channel<Update> {
-        val channel = Channel<Update>()
-        routerScope.launch {
-            for (incomingUpdate in channel) {
-                proceed(incomingUpdate)
-            }
-        }
-        return channel
     }
 
     class InternalException(override val message: String) : RuntimeException(message)

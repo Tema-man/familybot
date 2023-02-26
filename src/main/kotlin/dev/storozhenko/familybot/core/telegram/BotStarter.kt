@@ -23,12 +23,12 @@ class BotStarter {
     }
 
     private val commands: List<BotCommand>
-    private val helpCommand: BotCommand
+    private val privateCommands: List<BotCommand>
 
     init {
         val toml = readTomlFromStatic("commands.toml")
 
-        helpCommand = BotCommand("help", extractValue(toml, "help"))
+        privateCommands = listOf(BotCommand("help", extractValue(toml, "help")))
         commands = toml
             .keySet()
             .sortedBy { key -> toml.inputPositionOf(key)?.line() }
@@ -42,24 +42,14 @@ class BotStarter {
         val telegramBotsApi = TelegramBotsApi(DefaultBotSession::class.java)
         val bot = event.applicationContext.getBean(FamilyBot::class.java)
         telegramBotsApi.registerBot(bot)
-        bot.execute(
-            SetMyCommands
-                .builder()
-                .commands(commands)
-                .scope(BotCommandScopeAllGroupChats())
-                .build()
-        )
-        bot.execute(
-            SetMyCommands
-                .builder()
-                .command(helpCommand)
-                .scope(BotCommandScopeAllPrivateChats())
-                .build()
-        )
+        listOf(
+            BotCommandScopeAllGroupChats() to commands,
+            BotCommandScopeAllPrivateChats() to privateCommands
+        ).forEach { (scope, commands) ->
+            bot.execute(SetMyCommands.builder().scope(scope).commands(commands).build())
+        }
     }
 
-    private fun extractValue(toml: TomlParseResult, key: String): String {
-        return toml.getString(key)
-            ?: throw FamilyBot.InternalException("Missing command description for key=$key")
-    }
+    private fun extractValue(toml: TomlParseResult, key: String): String =
+        toml.getString(key) ?: throw FamilyBot.InternalException("Missing command description for key=$key")
 }

@@ -17,13 +17,9 @@ import java.util.regex.Pattern
 @Component
 class HuificatorExecutor(private val easyKeyValueService: EasyKeyValueService) : Executor,
     Configurable {
-    override fun getFunctionId(context: ExecutorContext): FunctionId {
-        return FunctionId.HUIFICATE
-    }
+    override fun getFunctionId(context: ExecutorContext): FunctionId = FunctionId.HUIFICATE
 
-    override fun priority(context: ExecutorContext): Priority {
-        return Priority.RANDOM
-    }
+    override fun priority(context: ExecutorContext): Priority = Priority.RANDOM
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val text = context.message.text ?: return {}

@@ -37,49 +37,44 @@ class FamilyBotApplication(
         } else {
             botConfigInjector.botNameAliases.split(",")
         }
+
         return BotConfig(
-            notEmptyCheck(botConfigInjector.botToken, "botToken"),
-            notEmptyCheck(botConfigInjector.botName, "botName"),
-            notEmptyCheck(botConfigInjector.developer, "developer"),
-            notEmptyCheck(botConfigInjector.developerId, "developerId"),
-            botNameAliases,
-            notEmptyCheckAllowOptional(
+            botToken = requireValue(botConfigInjector.botToken, "botToken"),
+            botName = requireValue(botConfigInjector.botName, "botName"),
+            developer = requireValue(botConfigInjector.developer, "developer"),
+            developerId = requireValue(botConfigInjector.developerId, "developerId"),
+            botNameAliases = botNameAliases,
+            yandexKey = optionalValue(
                 botConfigInjector::yandexKey,
                 "Yandex API key is not found, language API won't work"
             ),
-            notEmptyCheckAllowOptional(
+            paymentToken = optionalValue(
                 botConfigInjector::paymentToken,
                 "Payment token is not found, payment API won't work"
             ),
-            env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME),
-            notEmptyCheckAllowOptional(
+            testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME),
+            ytdlLocation = optionalValue(
                 botConfigInjector::ytdlLocation,
                 "yt-dlp is missing, downloading function won't work"
             )
         )
     }
 
-    private fun notEmptyCheck(value: String, valueName: String): String {
-        if (value.isBlank()) {
-            throw FamilyBot.InternalException("Value of '$valueName' must be not empty")
-        }
-        return value
-    }
+    private fun requireValue(value: String, valueName: String): String =
+        value.ifBlank { throw FamilyBot.InternalException("Value of '$valueName' must be not empty") }
 
-    private fun notEmptyCheckAllowOptional(value: () -> String?, log: String): String? {
-        return value()?.takeIf(String::isNotBlank).also {
-            if (it == null) {
-                logger.warn(log)
-            }
-        }
-    }
+    private fun optionalValue(value: () -> String?, log: String): String? =
+        value()
+            ?.takeIf(String::isNotBlank)
+            .also { if (it == null) logger.warn(log) }
 }
 
 @Suppress("unused")
 inline fun <reified T> T.getLogger(): Logger = LoggerFactory.getLogger(T::class.java)
 
 fun main() {
-    val app = SpringApplication(FamilyBotApplication::class.java)
-    app.webApplicationType = WebApplicationType.NONE
-    app.run()
+    SpringApplication(FamilyBotApplication::class.java).apply {
+        webApplicationType = WebApplicationType.NONE
+        run()
+    }
 }

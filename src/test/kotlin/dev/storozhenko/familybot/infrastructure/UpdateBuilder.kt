@@ -1,22 +1,18 @@
 package dev.storozhenko.familybot.infrastructure
 
 import dev.storozhenko.familybot.common.extensions.context
-import dev.storozhenko.familybot.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
+import dev.storozhenko.familybot.core.services.talking.Dictionary
+import dev.storozhenko.familybot.core.services.talking.DictionaryReader
+import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.core.telegram.stickers.Sticker
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.services.settings.UkrainianLanguage
-import dev.storozhenko.familybot.services.talking.Dictionary
-import dev.storozhenko.familybot.services.talking.DictionaryReader
-import dev.storozhenko.familybot.core.telegram.BotConfig
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.telegram.telegrambots.meta.api.objects.Chat
-import org.telegram.telegrambots.meta.api.objects.Message
-import org.telegram.telegrambots.meta.api.objects.MessageEntity
-import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.api.objects.User
+import org.telegram.telegrambots.meta.api.objects.*
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker as TelegramSticker
 
 private val keyValueService = mock<EasyKeyValueService> {
@@ -42,7 +38,11 @@ fun createSimpleContext(text: String? = null): ExecutorContext {
 
 fun Update.createContext() = this.context(botConfig, dictionary)
 
-fun createSimpleCommandContext(command: Command, prefix: String? = null, postfix: String? = null): ExecutorContext {
+fun createSimpleCommandContext(
+    command: Command,
+    prefix: String? = null,
+    postfix: String? = null
+): ExecutorContext {
     return createSimpleCommand(command, prefix, postfix).context(botConfig, dictionary)
 }
 
