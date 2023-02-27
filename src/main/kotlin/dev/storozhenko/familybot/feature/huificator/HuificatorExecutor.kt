@@ -21,7 +21,7 @@ class HuificatorExecutor(
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.HUIFICATE
 
-    override fun priority(context: ExecutorContext) = Priority.LOW
+    override fun priority(context: ExecutorContext) = Priority.LOWEST
 
     override fun canExecute(context: ExecutorContext): Boolean = shouldHuificate(context)
 

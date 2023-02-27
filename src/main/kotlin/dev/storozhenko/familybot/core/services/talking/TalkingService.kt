@@ -25,22 +25,14 @@ class TalkingService(
     suspend fun getReplyToUser(
         context: ExecutorContext,
         shouldBeQuestion: Boolean = false
-    ): String {
-        val message = coroutineScope {
-            async {
-                val userMessages = getMessagesForUser(context.user)
-                return@async if (shouldBeQuestion) {
-                    userMessages
-                        .filter { message -> message.endsWith("?") }
-                        .randomOrNull()
-                        ?: userMessages.random()
-                } else {
-                    userMessages.random()
-                }
-            }
+    ): String = coroutineScope {
+        val message = async {
+            getMessagesForUser(context.user)
+                .also { if (shouldBeQuestion) it.filter { message -> message.endsWith("?") } }
+                .randomOrNull() ?: "Хуй соси, губой тряси"
         }
 
-        return if (easyKeyValueService.get(UkrainianLanguage, context.chatKey) == true) {
+        if (easyKeyValueService.get(UkrainianLanguage, context.chatKey) == true) {
             translateService.translate(message.await())
         } else {
             message.await()

@@ -19,5 +19,5 @@ class TikTokDownloadPMExecutor(
         return tikTokDownloadExecutor.canExecute(context)
     }
 
-    override fun priority(context: ExecutorContext) = Priority.HIGH
+    override fun priority(context: ExecutorContext) = Priority.HIGHEST
 }

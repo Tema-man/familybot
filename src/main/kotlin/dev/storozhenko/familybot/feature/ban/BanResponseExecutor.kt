@@ -27,5 +27,5 @@ class BanResponseExecutor(
     override fun canExecute(context: ExecutorContext): Boolean =
         (banService.getUserBan(context) ?: banService.getChatBan(context)) != null
 
-    override fun priority(context: ExecutorContext) = Priority.HIGH
+    override fun priority(context: ExecutorContext) = Priority.HIGHEST
 }

@@ -10,7 +10,7 @@ abstract class OnlyBotOwnerExecutor(private val botConfig: BotConfig) : PrivateM
         from.userName == botConfig.developer && text.startsWith(getMessagePrefix(), ignoreCase = true)
     }
 
-    override fun priority(context: ExecutorContext) = Priority.HIGH
+    override fun priority(context: ExecutorContext) = Priority.HIGHEST
 
     abstract fun getMessagePrefix(): String
 }

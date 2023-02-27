@@ -48,7 +48,7 @@ class ChatLogRepository(private val template: JdbcTemplate) {
     @Timed("repository.ChatLogRepository.getRandomMessagesFromCommonPool")
     fun getRandomMessagesFromCommonPool(): List<String> {
         if (commonPoolMaxId <= 1) {
-            return listOf("хуй соси губой тряси")
+            return listOf("Хуй соси, губой тряси")
         }
         val ids = (1..10).map { randomLong(1, commonPoolMaxId) }.toSet()
         val paramMap = mapOf("ids" to ids)

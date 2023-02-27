@@ -101,15 +101,17 @@ class Router(
     private fun selectRandom(context: ExecutorContext): Executor {
         logger.info("No executor found, trying to find random priority executors")
 
-        loggingScope.launch(loggingExceptionHandler) {
-            logChatMessage(context)
-        }
+        saveMessageInLog(context)
         val executor = executors
             .filter { it.meteredPriority(context, meterRegistry) == Priority.LOWEST }
             .random()
 
         logger.info("Random priority executor ${executor.javaClass.simpleName} was selected")
         return executor
+    }
+
+    private fun saveMessageInLog(context: ExecutorContext) = loggingScope.launch(loggingExceptionHandler) {
+        logChatMessage(context)
     }
 
     private fun antiDdosSkip(context: ExecutorContext): suspend (AbsSender) -> Unit =
@@ -198,12 +200,12 @@ class Router(
         return executorsToProcess
             .asSequence()
             .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
-            .filter { (_, priority) -> priority higherThan Priority.LOWEST }
+            .filter { (_, priority) -> priority > Priority.LOWEST }
             .sortedByDescending { (_, priority) -> priority.score }
-            .map { (executor, _) -> executor }
-            .find { executor ->
-                executor.meteredCanExecute(context, meterRegistry)
-            } ?: selectRandom(context)
+            .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }
+            ?.also { (_, priority) -> if (priority < Priority.HIGH) saveMessageInLog(context) }
+            ?.first
+            ?: selectRandom(context)
     }
 
     private fun register(message: Message) {

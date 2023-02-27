@@ -25,7 +25,7 @@ class TalkingExecutor(
         if (isRageModeEnabled(context)) FunctionId.RAGE else FunctionId.CHATTING
 
     override fun priority(context: ExecutorContext) =
-        if (isRageModeEnabled(context)) Priority.HIGHEST else Priority.LOW
+        if (isRageModeEnabled(context)) Priority.HIGHEST else Priority.LOWEST
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         val rageModEnabled = isRageModeEnabled(context)
@@ -33,11 +33,9 @@ class TalkingExecutor(
             return {
                 val messageText = talkingService.getReplyToUser(context)
                     .let { message -> if (rageModEnabled) rageModeFormat(message) else message }
-                val delay = if (rageModEnabled.not()) {
-                    1000 to 2000
-                } else {
-                    100 to 500
-                }
+
+                val delay = if (rageModEnabled.not()) 1000 to 2000 else 100 to 500
+
                 it.send(
                     context,
                     messageText,
