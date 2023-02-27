@@ -46,7 +46,7 @@ class BotStarter {
             BotCommandScopeAllGroupChats() to commands,
             BotCommandScopeAllPrivateChats() to privateCommands
         ).forEach { (scope, commands) ->
-            bot.execute(SetMyCommands.builder().scope(scope).commands(commands).build())
+            bot.execute(SetMyCommands.builder().commands(commands).scope(scope).build())
         }
     }
 

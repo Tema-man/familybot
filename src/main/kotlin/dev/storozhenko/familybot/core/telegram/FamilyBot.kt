@@ -38,7 +38,7 @@ class FamilyBot(
             update.hasPollAnswer() -> proceedPollAnswer(update)
             update.hasPreCheckoutQuery() -> proceedPreCheckoutQuery(update)
             update.message?.hasSuccessfulPayment() == true -> proceedSuccessfulPayment(update)
-            update.run { hasMessage() || hasCallbackQuery() || hasEditedMessage() } -> proceedMessage(update)
+            update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
             update.hasPoll() -> {}
         }
     }

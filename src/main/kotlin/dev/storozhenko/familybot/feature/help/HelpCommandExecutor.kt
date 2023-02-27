@@ -11,9 +11,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 @Component
 class HelpCommandExecutor : CommandExecutor() {
 
-    override fun command(): Command {
-        return Command.HELP
-    }
+    override fun command() = Command.HELP
 
     override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return {

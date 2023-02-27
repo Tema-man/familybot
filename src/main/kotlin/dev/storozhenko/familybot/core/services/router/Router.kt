@@ -200,7 +200,7 @@ class Router(
         return executorsToProcess
             .asSequence()
             .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
-            .filter { (_, priority) -> priority > Priority.LOWEST }
+            .filter { (_, priority) -> priority higherThan Priority.LOWEST }
             .sortedByDescending { (_, priority) -> priority.score }
             .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }
             ?.also { (_, priority) -> if (priority < Priority.LOW) saveMessageInLog(context) }
