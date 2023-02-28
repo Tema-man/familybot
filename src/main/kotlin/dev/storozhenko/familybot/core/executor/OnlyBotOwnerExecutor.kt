@@ -7,7 +7,7 @@ import dev.storozhenko.familybot.core.telegram.BotConfig
 abstract class OnlyBotOwnerExecutor(private val botConfig: BotConfig) : PrivateMessageExecutor {
 
     override fun canExecute(context: ExecutorContext): Boolean = with(context.message) {
-        from.userName == botConfig.developer && text.startsWith(getMessagePrefix(), ignoreCase = true)
+        from.userName == botConfig.developer && text.orEmpty().startsWith(getMessagePrefix(), ignoreCase = true)
     }
 
     override fun priority(context: ExecutorContext) = Priority.HIGHEST
