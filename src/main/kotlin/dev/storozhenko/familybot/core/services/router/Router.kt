@@ -65,10 +65,9 @@ class Router(
             logger.warn("Someone is sending private messages: $update")
         } else {
             registerUpdate(message, update)
-            if (update.hasEditedMessage()) {
-                return {}
-            }
+            if (update.hasEditedMessage()) return {}
         }
+
         val context = update.context(botConfig, dictionary)
         val executor = selectExecutor(context, forSingleUser = !isGroup)
         logger.info("Executor to apply: ${executor.javaClass.simpleName}")
@@ -86,6 +85,25 @@ class Router(
                 logChatCommand(executor, context)
             }
         }
+    }
+
+    private fun selectExecutor(
+        context: ExecutorContext,
+        forSingleUser: Boolean = false
+    ): Executor {
+        val executorsToProcess = when {
+            context.isFromDeveloper -> executors
+            forSingleUser -> executors.filterIsInstance<PrivateMessageExecutor>()
+            else -> executors.filterNot { it is PrivateMessageExecutor }
+        }
+
+        return executorsToProcess
+            .asSequence()
+            .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
+            .filter { (_, priority) -> priority higherThan Priority.LOWEST }
+            .sortedByDescending { (_, priority) -> priority.score }
+            .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }?.first
+            ?: selectRandom(context)
     }
 
     private fun registerUpdate(
@@ -185,25 +203,6 @@ class Router(
             ?.takeIf { chatLogRegex.matches(it) } ?: return
 
         chatLogRepository.add(context.user, text)
-    }
-
-    private fun selectExecutor(
-        context: ExecutorContext,
-        forSingleUser: Boolean = false
-    ): Executor {
-        val executorsToProcess = when {
-            context.isFromDeveloper -> executors
-            forSingleUser -> executors.filterIsInstance<PrivateMessageExecutor>()
-            else -> executors.filterNot { it is PrivateMessageExecutor }
-        }
-
-        return executorsToProcess
-            .asSequence()
-            .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
-            .filter { (_, priority) -> priority higherThan Priority.LOWEST }
-            .sortedByDescending { (_, priority) -> priority.score }
-            .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }?.first
-            ?: selectRandom(context)
     }
 
     private fun register(message: Message) {

@@ -26,7 +26,21 @@ class PaymentRouter(
 ) {
     private val log = getLogger()
 
-    fun proceedPreCheckoutQuery(update: Update): suspend (AbsSender) -> Unit {
+    fun proceed(update: Update): suspend (AbsSender) -> Unit = when {
+        update.hasPreCheckoutQuery() -> handlePreCheckoutQuery(update)
+        update.message?.hasSuccessfulPayment() == true -> handleSuccessfulPayment(update)
+        else -> Result.failure(IllegalStateException("Message does not contain any payment information"))
+    }.getOrDefault { }
+
+    private fun handlePreCheckoutQuery(update: Update) =
+        runCatching { proceedPreCheckoutQuery(update) }
+            .onFailure { log.error("paymentRouter.proceedPreCheckoutQuery failed", it) }
+
+    private fun handleSuccessfulPayment(update: Update) =
+        runCatching { proceedSuccessfulPayment(update) }
+            .onFailure { log.warn("paymentRouter.proceedSuccessfulPayment failed", it) }
+
+    private fun proceedPreCheckoutQuery(update: Update): suspend (AbsSender) -> Unit {
         val shopPayload = getPayload(update.preCheckoutQuery.invoicePayload)
             .copy(userId = update.from().id)
         val settingsKey = ChatEasyKey(shopPayload.chatId)
@@ -68,7 +82,7 @@ class PaymentRouter(
         }
     }
 
-    fun proceedSuccessfulPayment(update: Update): suspend (AbsSender) -> Unit {
+    private fun proceedSuccessfulPayment(update: Update): suspend (AbsSender) -> Unit {
         val shopPayload = getPayload(update.message.successfulPayment.invoicePayload)
         return { sender ->
             runCatching { paymentService.processSuccessfulPayment(shopPayload) }

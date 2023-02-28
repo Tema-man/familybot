@@ -36,35 +36,19 @@ class FamilyBot(
 
         when {
             update.hasPollAnswer() -> proceedPollAnswer(update)
-            update.hasPreCheckoutQuery() -> proceedPreCheckoutQuery(update)
-            update.message?.hasSuccessfulPayment() == true -> proceedSuccessfulPayment(update)
+            update.hasPreCheckoutQuery() || update.message?.hasSuccessfulPayment() == true -> proceedPayment(update)
             update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
             update.hasPoll() -> {}
         }
     }
 
+    private fun proceedPayment(update: Update) = routerScope.launch {
+        paymentRouter.proceed(update).invoke(this@FamilyBot)
+    }
+
     private fun proceedPollAnswer(update: Update) = routerScope.launch {
-        runCatching {
-            pollRouter.proceed(update)
-        }.onFailure {
-            log.warn("pollRouter.proceed failed", it)
-        }
-    }
-
-    private fun proceedPreCheckoutQuery(update: Update) = routerScope.launch {
-        runCatching {
-            paymentRouter.proceedPreCheckoutQuery(update)
-        }.onFailure {
-            log.error("paymentRouter.proceedPreCheckoutQuery failed", it)
-        }.getOrDefault { }(this@FamilyBot)
-    }
-
-    private fun proceedSuccessfulPayment(update: Update) = routerScope.launch {
-        runCatching {
-            paymentRouter.proceedSuccessfulPayment(update)
-        }.onFailure {
-            log.warn("paymentRouter.proceedSuccessfulPayment failed", it)
-        }.getOrDefault { }(this@FamilyBot)
+        runCatching { pollRouter.proceed(update) }
+            .onFailure { log.warn("pollRouter.proceed failed", it) }
     }
 
     private fun proceedMessage(update: Update) = routerScope.launch {
