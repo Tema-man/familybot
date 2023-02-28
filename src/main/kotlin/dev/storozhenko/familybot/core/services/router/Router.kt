@@ -202,9 +202,7 @@ class Router(
             .map { executor -> executor to executor.meteredPriority(context, meterRegistry) }
             .filter { (_, priority) -> priority higherThan Priority.LOWEST }
             .sortedByDescending { (_, priority) -> priority.score }
-            .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }
-            ?.also { (_, priority) -> if (priority < Priority.LOW) saveMessageInLog(context) }
-            ?.first
+            .find { (executor, _) -> executor.meteredCanExecute(context, meterRegistry) }?.first
             ?: selectRandom(context)
     }
 
