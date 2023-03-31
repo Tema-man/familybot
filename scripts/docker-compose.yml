@@ -13,7 +13,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - "127.0.0.1:6379:6379"
+      - 6379:6379
     command:
       - "--appendonly yes"
 
@@ -31,7 +31,7 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
     ports:
-      - "127.0.0.1:5432:5432"
+      - 5432:5432
 
   family-pgadmin:
     container_name: family-pgadmin
@@ -45,7 +45,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD
     restart: always
     ports:
-      - "127.0.0.1:5081:80"
+      - 5081:80
 
   family:
     container_name: family
