@@ -3,12 +3,12 @@ package dev.storozhenko.familybot.core.telegram
 import dev.storozhenko.familybot.common.extensions.toChat
 import dev.storozhenko.familybot.common.extensions.toJson
 import dev.storozhenko.familybot.common.extensions.toUser
-import dev.storozhenko.familybot.models.router.FunctionId
 import dev.storozhenko.familybot.core.services.router.PaymentRouter
 import dev.storozhenko.familybot.core.services.router.PollRouter
 import dev.storozhenko.familybot.core.services.router.Router
-import dev.storozhenko.familybot.services.settings.ChatEasyKey
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.router.model.FunctionId
+import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -84,11 +84,7 @@ class FamilyBot(
                 if (e.apiResponse.contains("CHAT_WRITE_FORBIDDEN")) {
                     listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack)
                         .forEach { function ->
-                            easyKeyValueService.put(
-                                function,
-                                ChatEasyKey(update.toChat().id),
-                                false
-                            )
+                            easyKeyValueService.put(function, ChatEasyKey(update.toChat().id), false)
                         }
                 }
             } else {

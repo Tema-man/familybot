@@ -1,10 +1,10 @@
-package dev.storozhenko.familybot.services.talking
+package dev.storozhenko.familybot.core.services.talking
 
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.models.telegram.User
-import dev.storozhenko.familybot.repos.ChatLogRepository
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.services.settings.UkrainianLanguage
+import dev.storozhenko.familybot.core.repository.ChatLogRepository
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
+import dev.storozhenko.familybot.core.telegram.model.User
 import io.micrometer.core.annotation.Timed
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

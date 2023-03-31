@@ -40,6 +40,10 @@ dependencies {
     implementation("org.telegram:telegrambots:6.5.0")
     implementation("org.tomlj:tomlj:1.1.0")
 
+    implementation("com.theokanning.openai-gpt3-java:api:0.11.0")
+    implementation("com.theokanning.openai-gpt3-java:client:0.11.0")
+    implementation("com.theokanning.openai-gpt3-java:service:0.11.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.4")
     testImplementation("org.testcontainers:testcontainers:1.17.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.8.10")

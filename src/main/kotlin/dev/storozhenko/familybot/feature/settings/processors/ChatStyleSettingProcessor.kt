@@ -2,9 +2,10 @@ package dev.storozhenko.familybot.executors.command.settings.processors
 
 import dev.storozhenko.familybot.common.extensions.getMessageTokens
 import dev.storozhenko.familybot.common.extensions.send
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.services.settings.ChatGPTStyle
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.settings.ChatGPTStyle
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.feature.settings.processors.SettingProcessor
 import dev.storozhenko.familybot.services.talking.GptStyle
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender

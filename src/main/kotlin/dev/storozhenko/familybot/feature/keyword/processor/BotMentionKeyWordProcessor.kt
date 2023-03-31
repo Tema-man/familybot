@@ -1,12 +1,11 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
 import dev.storozhenko.familybot.common.extensions.randomBoolean
-import dev.storozhenko.familybot.common.extensions.send
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.FuckOffOverride
 import dev.storozhenko.familybot.core.services.settings.FuckOffTolerance
-import dev.storozhenko.familybot.core.services.talking.TalkingService
+import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import dev.storozhenko.familybot.common.extensions.sendDeferred
@@ -16,14 +15,13 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
-import java.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 @Component
 class BotMentionKeyWordProcessor(
     private val botConfig: BotConfig,
-    @Qualifier("Picker") private val talkingService: TalkingService,
+    @Qualifier("Picker") private val talkingService: TalkingServiceOld,
     private val easyKeyValueService: EasyKeyValueService
 ) : KeyWordProcessor {
 

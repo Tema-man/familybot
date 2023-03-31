@@ -1,10 +1,12 @@
 package dev.storozhenko.familybot.services.talking
 
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.services.settings.ChatGPTFreeMessagesLeft
-import dev.storozhenko.familybot.services.settings.ChatGPTPaidTill
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.telegram.BotConfig
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.settings.ChatGPTFreeMessagesLeft
+import dev.storozhenko.familybot.core.services.settings.ChatGPTPaidTill
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.talking.TalkingService
+import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
+import dev.storozhenko.familybot.core.telegram.BotConfig
 import org.springframework.stereotype.Component
 import java.time.Instant
 import kotlin.time.Duration.Companion.days

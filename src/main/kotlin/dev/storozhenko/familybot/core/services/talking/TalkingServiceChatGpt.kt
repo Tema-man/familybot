@@ -9,17 +9,18 @@ import dev.storozhenko.familybot.common.extensions.code
 import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.common.extensions.startOfDay
 import dev.storozhenko.familybot.common.extensions.untilNextMonth
-import dev.storozhenko.familybot.models.router.ExecutorContext
-import dev.storozhenko.familybot.models.router.FunctionId
-import dev.storozhenko.familybot.repos.CommonRepository
-import dev.storozhenko.familybot.services.settings.ChatGPTStyle
-import dev.storozhenko.familybot.services.settings.ChatGPTTokenUsageByChat
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.telegram.BotConfig
-import dev.storozhenko.familybot.telegram.FamilyBot
+import dev.storozhenko.familybot.core.repository.CommonRepository
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.router.model.FunctionId
+import dev.storozhenko.familybot.core.services.settings.ChatGPTStyle
+import dev.storozhenko.familybot.core.services.settings.ChatGPTTokenUsageByChat
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.talking.TalkingService
+import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.telegram.FamilyBot
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.util.LinkedList
+import java.util.*
 
 @Component("GPT")
 class TalkingServiceChatGpt(

@@ -1,15 +1,15 @@
 package dev.storozhenko.familybot.services.payment.processors
 
 import dev.storozhenko.familybot.common.extensions.prettyFormat
-import dev.storozhenko.familybot.models.dictionary.Phrase
-import dev.storozhenko.familybot.models.shop.PreCheckOutResponse
-import dev.storozhenko.familybot.models.shop.ShopItem
-import dev.storozhenko.familybot.models.shop.ShopPayload
-import dev.storozhenko.familybot.models.shop.SuccessPaymentResponse
-import dev.storozhenko.familybot.services.payment.PaymentProcessor
-import dev.storozhenko.familybot.services.settings.ChatEasyKey
-import dev.storozhenko.familybot.services.settings.ChatGPTPaidTill
-import dev.storozhenko.familybot.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.payment.PaymentProcessor
+import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
+import dev.storozhenko.familybot.core.services.settings.ChatGPTPaidTill
+import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
+import dev.storozhenko.familybot.core.services.talking.model.Phrase
+import dev.storozhenko.familybot.feature.shop.model.PreCheckOutResponse
+import dev.storozhenko.familybot.feature.shop.model.ShopItem
+import dev.storozhenko.familybot.feature.shop.model.ShopPayload
+import dev.storozhenko.familybot.feature.shop.model.SuccessPaymentResponse
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import java.time.Duration
