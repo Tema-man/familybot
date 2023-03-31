@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.core.telegram
 
-import dev.storozhenko.familybot.common.extensions.readTomlFromStatic
+import dev.storozhenko.familybot.core.executor.CommandExecutor
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -22,34 +22,21 @@ class BotStarter {
         const val NOT_TESTING_PROFILE_NAME = "!$TESTING_PROFILE_NAME"
     }
 
-    private val commands: List<BotCommand>
-    private val privateCommands: List<BotCommand>
-
-    init {
-        val toml = readTomlFromStatic("commands.toml")
-
-        privateCommands = listOf(BotCommand("help", extractValue(toml, "help")))
-        commands = toml
-            .keySet()
-            .sortedBy { key -> toml.inputPositionOf(key)?.line() }
-            .map { key -> key to extractValue(toml, key) }
-            .map { (command, description) -> BotCommand(command, description) }
-            .toList()
-    }
-
     @EventListener(ApplicationReadyEvent::class)
     fun telegramBot(event: ApplicationReadyEvent) {
         val telegramBotsApi = TelegramBotsApi(DefaultBotSession::class.java)
         val bot = event.applicationContext.getBean(FamilyBot::class.java)
+
+        val commands = event.applicationContext.getBeansOfType(CommandExecutor::class.java).values.asSequence()
+            .map { it.command() }.sorted().distinct()
+            .map { BotCommand(it.command, it.description) }.toList()
+
         telegramBotsApi.registerBot(bot)
         listOf(
             BotCommandScopeAllGroupChats() to commands,
-            BotCommandScopeAllPrivateChats() to privateCommands
+            BotCommandScopeAllPrivateChats() to commands
         ).forEach { (scope, commands) ->
             bot.execute(SetMyCommands.builder().commands(commands).scope(scope).build())
         }
     }
-
-    private fun extractValue(toml: TomlParseResult, key: String): String =
-        toml.getString(key) ?: throw FamilyBot.InternalException("Missing command description for key=$key")
 }

@@ -74,8 +74,7 @@ class FamilyBot(
             MDC.put("user", "${user.name}:${user.id}")
             router.processUpdate(update).invoke(this@FamilyBot)
         } catch (e: TelegramApiRequestException) {
-            val logMessage =
-                "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
+            val logMessage = "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
             if (e.errorCode in 400..499) {
                 log.warn(logMessage, e)
             } else {

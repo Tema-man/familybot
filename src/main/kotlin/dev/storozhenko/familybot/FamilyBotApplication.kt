@@ -1,7 +1,6 @@
 package dev.storozhenko.familybot
 
 import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.BotConfigInjector
 import dev.storozhenko.familybot.core.telegram.BotStarter
 import dev.storozhenko.familybot.core.telegram.FamilyBot
 import io.micrometer.core.aop.TimedAspect
@@ -11,7 +10,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.context.properties.bind.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -25,9 +26,7 @@ class FamilyBotApplication(
     private val logger = getLogger()
 
     @Bean
-    fun timedAspect(registry: MeterRegistry): TimedAspect {
-        return TimedAspect(registry)
-    }
+    fun injectTimedAspect(registry: MeterRegistry): TimedAspect = TimedAspect(registry)
 
     @Bean
     fun injectBotConfig(botConfigInjector: BotConfigInjector): BotConfig {
@@ -52,11 +51,11 @@ class FamilyBotApplication(
                 botConfigInjector::paymentToken,
                 "Payment token is not found, payment API won't work"
             ),
-            testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME),
             ytdlLocation = optionalValue(
                 botConfigInjector::ytdlLocation,
                 "yt-dlp is missing, downloading function won't work"
-            )
+            ),
+            testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME)
         )
     }
 
@@ -68,6 +67,18 @@ class FamilyBotApplication(
             ?.takeIf(String::isNotBlank)
             .also { if (it == null) logger.warn(log) }
 }
+
+@ConfigurationProperties("settings", ignoreInvalidFields = false)
+data class BotConfigInjector @ConstructorBinding constructor(
+    val botToken: String,
+    val botName: String,
+    val developer: String,
+    val developerId: String,
+    val botNameAliases: String?,
+    val yandexKey: String?,
+    val paymentToken: String?,
+    val ytdlLocation: String?
+)
 
 @Suppress("unused")
 inline fun <reified T> T.getLogger(): Logger = LoggerFactory.getLogger(T::class.java)
