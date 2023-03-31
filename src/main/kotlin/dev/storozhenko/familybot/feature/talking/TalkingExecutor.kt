@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.talking
 
 import dev.storozhenko.familybot.common.extensions.randomBoolean
 import dev.storozhenko.familybot.common.extensions.randomInt
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.common.extensions.sendDeferred
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
@@ -12,12 +12,15 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.RageMode
 import dev.storozhenko.familybot.core.services.settings.TalkingDensity
 import dev.storozhenko.familybot.core.services.talking.TalkingService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class TalkingExecutor(
-    private val talkingService: TalkingService,
+    @Qualifier("Picker") private val talkingService: TalkingService,
     private val easyKeyValueService: EasyKeyValueService
 ) : Executor, Configurable {
 
@@ -31,20 +34,25 @@ class TalkingExecutor(
         val rageModEnabled = isRageModeEnabled(context)
         if (shouldReply(rageModEnabled, context)) {
             return {
-                val messageText = talkingService.getReplyToUser(context)
-                    .let { message -> if (rageModEnabled) rageModeFormat(message) else message }
+                coroutineScope {
+                    val messageText = async {
+                        talkingService.getReplyToUser(context)
+                            .let { message -> if (rageModEnabled) rageModeFormat(message) else message }
+                    }
 
                 val delay = if (rageModEnabled.not()) 1000 to 2000 else 100 to 500
 
-                it.send(
-                    context,
-                    messageText,
-                    replyToUpdate = true,
-                    shouldTypeBeforeSend = true,
-                    typeDelay = delay
-                )
-                if (rageModEnabled) {
-                    decrementRageModeMessagesAmount(context)
+                    it.sendDeferred(
+                        context,
+                        messageText,
+                        replyToUpdate = true,
+                        shouldTypeBeforeSend = true,
+                        typeDelay = delay,
+                        enableHtml = true
+                    )
+                    if (rageModEnabled) {
+                        decrementRageModeMessagesAmount(context)
+                    }
                 }
             }
         } else {

@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlin.time.Duration.Companion.seconds
 
 @Component
 class ScenarioSessionManagementService(
@@ -103,7 +104,7 @@ class ScenarioSessionManagementService(
                         context.phrase(Phrase.SCENARIO_POLL_DRAW)
                     )
                     val evenMorePreviousMove = scenarioService.getPreviousMove(previousMove)
-                    delay(2000)
+                    delay(2.seconds)
                     continueGame(context, previousMove, sender, evenMorePreviousMove)
                 }
             } else {
@@ -124,8 +125,7 @@ class ScenarioSessionManagementService(
                         log.error("Sending poll reply fucked up", throwable)
                         sender.send(
                             context,
-                            context.phrase(Phrase.SCENARIO_POLL_EXISTS_FALLBACK)
-                                .replace("\$timeLeft", timeLeft)
+                            context.phrase(Phrase.SCENARIO_POLL_EXISTS_FALLBACK).replace("\$timeLeft", timeLeft)
                         )
                     }
             }
@@ -140,7 +140,7 @@ class ScenarioSessionManagementService(
     ) {
         if (previousMove != null) {
             sender.send(context, getExpositionMessage(nextMove, previousMove), enableHtml = true)
-            delay(2000)
+            delay(2.seconds)
         }
 
         val message = sendPoll(context, nextMove).invoke(sender)
@@ -189,16 +189,8 @@ class ScenarioSessionManagementService(
         scenarioMove: ScenarioMove
     ): suspend (AbsSender) -> Message {
         return when {
-            scenarioMove.ways.any { it.description.length > 100 } -> sendSeparately(
-                scenarioMove,
-                context
-            )
-
-            scenarioMove.description.length > 255 -> sendDescriptionSeparately(
-                scenarioMove,
-                context
-            )
-
+            scenarioMove.ways.any { it.description.length > 100 } -> sendSeparately(scenarioMove, context)
+            scenarioMove.description.length > 255 -> sendDescriptionSeparately(scenarioMove, context)
             else -> sendInOneMessage(scenarioMove, context)
         }
     }
@@ -272,14 +264,10 @@ class ScenarioSessionManagementService(
         { sender ->
             val evenMorePreviousMove = scenarioService.getPreviousMove(previousMove)
                 ?: throw FamilyBot.InternalException("Scenario seems broken")
-            sender.send(
-                context,
-                getExpositionMessage(previousMove, evenMorePreviousMove),
-                enableHtml = true
-            )
-            delay(2000)
+            sender.send(context, getExpositionMessage(previousMove, evenMorePreviousMove), enableHtml = true)
+            delay(2.seconds)
             sender.send(context, previousMove.description)
-            delay(2000)
+            delay(2.seconds)
             sender.send(context, context.phrase(Phrase.SCENARIO_END))
         }
 }

@@ -1,5 +1,6 @@
 package dev.storozhenko.familybot.feature.shop
 
+import dev.storozhenko.familybot.common.extensions.from
 import dev.storozhenko.familybot.common.extensions.rubles
 import dev.storozhenko.familybot.common.extensions.toJson
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
@@ -34,6 +35,11 @@ class ShopContinuousExecutor(
             ?: return {}
 
         return {
+            val additionalTax = if (context.update.from().isPremium == true) {
+                10.rubles()
+            } else {
+                0
+            }
             it.execute(AnswerCallbackQuery(callbackQuery.id))
             it.execute(
                 SendInvoice(
@@ -44,7 +50,7 @@ class ShopContinuousExecutor(
                     providerToken,
                     "help",
                     "RUB",
-                    listOf(LabeledPrice(context.phrase(Phrase.SHOP_PAY_LABEL), shopItem.price))
+                    listOf(LabeledPrice(context.phrase(Phrase.SHOP_PAY_LABEL), shopItem.price + additionalTax))
                 ).apply {
                     maxTipAmount = 100.rubles()
                     suggestedTipAmounts =

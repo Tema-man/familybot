@@ -6,14 +6,17 @@ import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.PshenitsinTolerance
 import dev.storozhenko.familybot.core.services.talking.TalkingService
+import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 @Component
 class PshenitsinKeyWordProcessor(
-    private val talkingService: TalkingService,
+    @Qualifier("Old") private val talkingService: TalkingService,
     private val keyValueService: EasyKeyValueService
 ) : KeyWordProcessor {
 
@@ -44,7 +47,7 @@ class PshenitsinKeyWordProcessor(
                 replyToUpdate = true
             )
 
-            keyValueService.put(PshenitsinTolerance, context.chatKey, true, Duration.ofMinutes(1))
+            keyValueService.put(PshenitsinTolerance, context.chatKey, true, 1.minutes)
         }
     }
 

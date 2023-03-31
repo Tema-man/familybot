@@ -8,8 +8,10 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.time.toKotlinDuration
 
 object DateConstants {
+    const val VITYA_MORTGAGE_DATE = 1678706466L
     val theBirthDayOfFamilyBot: Instant = LocalDateTime.of(
         2017,
         Month.DECEMBER,
@@ -56,7 +58,7 @@ private val dateTimeFormatter =
 
 fun Instant.prettyFormat(): String = dateTimeFormatter.format(this)
 
-fun untilNextDay(): Duration {
+fun untilNextDay(): kotlin.time.Duration {
     val currentTime = Instant.now()
     val startOfNextDay = LocalDateTime
         .now()
@@ -64,10 +66,10 @@ fun untilNextDay(): Duration {
         .plusDays(1)
         .toInstant(ZoneOffset.UTC)
 
-    return Duration.between(currentTime, startOfNextDay)
+    return Duration.between(currentTime, startOfNextDay).toKotlinDuration()
 }
 
-fun untilNextMonth(): Duration {
+fun untilNextMonth(): kotlin.time.Duration {
     val currentTime = Instant.now()
     val startOfNextMonth = LocalDateTime.now()
         .truncatedTo(ChronoUnit.DAYS)
@@ -75,7 +77,7 @@ fun untilNextMonth(): Duration {
         .plusMonths(1)
         .toInstant(ZoneOffset.UTC)
 
-    return Duration.between(currentTime, startOfNextMonth)
+    return Duration.between(currentTime, startOfNextMonth).toKotlinDuration()
 }
 
 fun startOfCurrentMonth(): Instant =

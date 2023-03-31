@@ -9,20 +9,26 @@ import dev.storozhenko.familybot.core.services.settings.FuckOffTolerance
 import dev.storozhenko.familybot.core.services.talking.TalkingService
 import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
+import dev.storozhenko.familybot.common.extensions.sendDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @Component
 class BotMentionKeyWordProcessor(
     private val botConfig: BotConfig,
-    private val talkingService: TalkingService,
+    @Qualifier("Picker") private val talkingService: TalkingService,
     private val easyKeyValueService: EasyKeyValueService
 ) : KeyWordProcessor {
 
-    private val defaultFuckOffDuration = Duration.ofMinutes(15)
-    private val defaultToleranceDuration = Duration.ofHours(24)
+    private val defaultFuckOffDuration = 15.minutes
+    private val defaultToleranceDuration = 24.hours
 
     private val fuckOffPhrases = setOf(
         Regex(".*завали.{0,10}ебало.*", RegexOption.IGNORE_CASE),
@@ -42,11 +48,15 @@ class BotMentionKeyWordProcessor(
         }
         val shouldBeQuestion = isBotMention(context.message) || isBotNameMention(context.message)
         return {
-            val reply = talkingService.getReplyToUser(
-                context,
-                randomBoolean() && shouldBeQuestion
-            )
-            it.send(context, reply, replyToUpdate = true, shouldTypeBeforeSend = true)
+            coroutineScope {
+                val reply = async {
+                    talkingService.getReplyToUser(
+                        context,
+                        randomBoolean() && shouldBeQuestion
+                    )
+                }
+                it.sendDeferred(context, reply, replyToUpdate = true, shouldTypeBeforeSend = true, enableHtml = true)
+            }
         }
     }
 
@@ -76,12 +86,7 @@ class BotMentionKeyWordProcessor(
 
     fun fuckOff(context: ExecutorContext): suspend (AbsSender) -> Unit {
         easyKeyValueService.put(FuckOffOverride, context.chatKey, true, defaultFuckOffDuration)
-        easyKeyValueService.put(
-            FuckOffTolerance,
-            context.userAndChatKey,
-            true,
-            defaultToleranceDuration
-        )
+        easyKeyValueService.put(FuckOffTolerance, context.userAndChatKey, true, defaultToleranceDuration)
         return {}
     }
 

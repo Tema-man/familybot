@@ -9,8 +9,9 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.telegram.model.Chat
 import dev.storozhenko.familybot.core.telegram.model.User
 import org.springframework.stereotype.Component
-import java.time.Duration
 import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 
 @Component
 class BanService(
@@ -45,11 +46,11 @@ class BanService(
     }
 
     private fun calculateDuration(isForever: Boolean): Duration {
-        return if (isForever) Duration.ofDays(9999) else Duration.ofDays(7)
+        return if (isForever) 9999.days else 7.days
     }
 
     private fun banByKey(easyKey: EasyKey, description: String, duration: Duration) {
-        val until = Instant.now().plusSeconds(duration.seconds)
+        val until = Instant.now().plusSeconds(duration.inWholeSeconds)
         easyKeyValueService.put(
             Ban,
             easyKey,

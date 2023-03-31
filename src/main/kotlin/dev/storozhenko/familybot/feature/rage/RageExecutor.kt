@@ -16,6 +16,7 @@ import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 @Component
 class RageExecutor(
@@ -36,7 +37,7 @@ class RageExecutor(
         val key = context.chatKey
         if (isRageForced(context)) {
             log.warn("Someone forced ${command()}")
-            easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, Duration.ofMinutes(10))
+            easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, 10.minutes)
             return {
                 it.send(context, context.phrase(Phrase.RAGE_INITIAL), shouldTypeBeforeSend = true)
             }
@@ -63,7 +64,7 @@ class RageExecutor(
                 )
             }
         }
-        easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, Duration.ofMinutes(10))
+        easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, 10.minutes)
         easyKeyValueService.put(RageTolerance, key, true, untilNextDay())
         return {
             it.send(context, context.phrase(Phrase.RAGE_INITIAL), shouldTypeBeforeSend = true)

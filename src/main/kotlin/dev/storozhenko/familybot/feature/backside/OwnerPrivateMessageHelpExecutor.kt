@@ -20,7 +20,7 @@ class OwnerPrivateMessageHelpExecutor(
 
     override fun getMessagePrefix() = "help"
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Unit {
         return { sender -> sender.send(context, helpMessage) }
     }
 }

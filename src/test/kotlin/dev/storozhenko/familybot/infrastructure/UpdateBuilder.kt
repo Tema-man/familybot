@@ -29,7 +29,8 @@ private val botConfig = BotConfig(
     yandexKey = null,
     paymentToken = null,
     testEnvironment = true,
-    ytdlLocation = null
+    ytdlLocation = null,
+    openAiToken = null
 )
 
 fun createSimpleContext(text: String? = null): ExecutorContext {

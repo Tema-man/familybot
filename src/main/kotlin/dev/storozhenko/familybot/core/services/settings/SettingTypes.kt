@@ -30,6 +30,11 @@ object ProposalTo : LongKeyType<UserAndChatEasyKey>
 object MessageCounter : LongKeyType<UserAndChatEasyKey>
 object TikTokDownload : BooleanKeyType<ChatEasyKey>
 object BotOwnerPidorSkip : BooleanKeyType<ChatEasyKey>
+object ChatGPTStyle: StringKeyType<ChatEasyKey>
+
+object ChatGPTPaidTill: LongKeyType<ChatEasyKey>
+object ChatGPTFreeMessagesLeft: LongKeyType<ChatEasyKey>
+object ChatGPTTokenUsageByChat: LongKeyType<ChatEasyKey>
 
 // available in shop
 object AskWorldChatUsages : LongKeyType<ChatEasyKey>

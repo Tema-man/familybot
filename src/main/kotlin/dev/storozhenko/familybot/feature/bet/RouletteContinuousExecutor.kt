@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 @Component
 @Deprecated(message = "Replaced with BetContinious")
@@ -60,13 +61,8 @@ class RouletteContinuousExecutor(
                         )
                     }
                 }
-                delay(1000)
-                it.execute(
-                    SendMessage(
-                        chatId,
-                        "В наказание твое пидорское очко уходит к остальным"
-                    )
-                )
+                delay(1.seconds)
+                it.execute(SendMessage(chatId, "В наказание твое пидорское очко уходит к остальным"))
             }
         }
         val rouletteNumber = randomInt(1, 7)
@@ -75,13 +71,8 @@ class RouletteContinuousExecutor(
             if (rouletteNumber == number) {
                 it.execute(SendMessage(chatId, "Ты ходишь по охуенно тонкому льду"))
                 coroutineScope { launch { repeat(5) { pidorRepository.removePidorRecord(user) } } }
-                delay(2000)
-                it.execute(
-                    SendMessage(
-                        chatId,
-                        "Но он пока не треснул. Свое пидорское очко можешь забрать. "
-                    )
-                )
+                delay(2.seconds)
+                it.execute(SendMessage(chatId, "Но он пока не треснул. Свое пидорское очко можешь забрать. "))
             } else {
                 it.execute(SendMessage(chatId, "Ты ходишь по охуенно тонкому льду"))
                 coroutineScope {
@@ -96,7 +87,7 @@ class RouletteContinuousExecutor(
                         }
                     }
                 }
-                delay(2000)
+                delay(2.seconds)
                 it.execute(
                     SendMessage(
                         chatId,
@@ -104,7 +95,7 @@ class RouletteContinuousExecutor(
                     )
                 )
             }
-            delay(2000)
+            delay(2.seconds)
             pidorCompetitionService.pidorCompetition(context.chat, context.chatKey).invoke(it)
         }
     }

@@ -55,6 +55,10 @@ class FamilyBotApplication(
                 botConfigInjector::ytdlLocation,
                 "yt-dlp is missing, downloading function won't work"
             ),
+            notEmptyCheckAllowOptional(
+                botConfigInjector::openAiToken,
+                "OpenAI token is missing, API won't work"
+            ),
             testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME)
         )
     }
@@ -77,7 +81,8 @@ data class BotConfigInjector @ConstructorBinding constructor(
     val botNameAliases: String?,
     val yandexKey: String?,
     val paymentToken: String?,
-    val ytdlLocation: String?
+    val ytdlLocation: String?,
+    val openAiToken: String?
 )
 
 @Suppress("unused")
