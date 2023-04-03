@@ -9,6 +9,7 @@ import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import dev.storozhenko.familybot.common.extensions.sendDeferred
+import dev.storozhenko.familybot.core.services.talking.TalkingService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Qualifier
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.minutes
 @Component
 class BotMentionKeyWordProcessor(
     private val botConfig: BotConfig,
-    @Qualifier("Picker") private val talkingService: TalkingServiceOld,
+    @Qualifier("Picker") private val talkingService: TalkingService,
     private val easyKeyValueService: EasyKeyValueService
 ) : KeyWordProcessor {
 

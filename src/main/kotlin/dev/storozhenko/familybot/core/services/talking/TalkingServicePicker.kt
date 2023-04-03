@@ -7,6 +7,7 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.talking.TalkingService
 import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import dev.storozhenko.familybot.core.telegram.BotConfig
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.time.Instant
 import kotlin.time.Duration.Companion.days
@@ -14,7 +15,7 @@ import kotlin.time.Duration.Companion.days
 @Component("Picker")
 class TalkingServicePicker(
     private val chatGpt: TalkingServiceChatGpt,
-    private val old: TalkingServiceOld,
+    @Qualifier("Old") private val old: TalkingServiceOld,
     private val easyKeyValueService: EasyKeyValueService,
     private val botConfig: BotConfig
 ) : TalkingService {

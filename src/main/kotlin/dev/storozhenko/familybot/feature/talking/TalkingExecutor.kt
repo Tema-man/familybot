@@ -11,6 +11,7 @@ import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.RageMode
 import dev.storozhenko.familybot.core.services.settings.TalkingDensity
+import dev.storozhenko.familybot.core.services.talking.TalkingService
 import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -20,7 +21,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class TalkingExecutor(
-    @Qualifier("Picker") private val talkingService: TalkingServiceOld,
+    @Qualifier("Picker") private val talkingService: TalkingService,
     private val easyKeyValueService: EasyKeyValueService
 ) : Executor, Configurable {
 
