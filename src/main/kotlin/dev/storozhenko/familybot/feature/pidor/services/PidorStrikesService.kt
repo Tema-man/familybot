@@ -1,14 +1,14 @@
 package dev.storozhenko.familybot.feature.pidor.services
 
 import dev.storozhenko.familybot.common.extensions.bold
-import dev.storozhenko.familybot.common.extensions.sendContextFree
+import dev.storozhenko.familybot.telegram.sendContextFree
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.lang.Integer.max
@@ -30,7 +30,7 @@ class PidorStrikesService(
         pidorStrikeStorage.save(chatEasyKey, newStats)
 
         val newPidorStrike = newStats.stats[pidor.id]
-            ?: throw FamilyBot.InternalException("Some huge internal logic problem, please investigate")
+            ?: throw TelegramBot.InternalException("Some huge internal logic problem, please investigate")
         return if (newPidorStrike.currentStrike >= 2 && newStats.stats.size > 1) {
             congratulate(chat, chatEasyKey, newPidorStrike)
         } else {

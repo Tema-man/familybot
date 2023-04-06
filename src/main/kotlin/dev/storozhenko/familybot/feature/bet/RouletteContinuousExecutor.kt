@@ -4,9 +4,10 @@ import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.Pidor
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.feature.pidor.services.PidorCompetitionService
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -43,7 +44,7 @@ class RouletteContinuousExecutor(
                 (message.replyToMessage.text ?: "") in getDialogMessages(context)
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val user = context.user
         val chatId = context.chat.idString
 
@@ -63,6 +64,7 @@ class RouletteContinuousExecutor(
                 }
                 delay(1.seconds)
                 it.execute(SendMessage(chatId, "В наказание твое пидорское очко уходит к остальным"))
+                null
             }
         }
         val rouletteNumber = randomInt(1, 7)
@@ -97,6 +99,7 @@ class RouletteContinuousExecutor(
             }
             delay(2.seconds)
             pidorCompetitionService.pidorCompetition(context.chat, context.chatKey).invoke(it)
+            null
         }
     }
 }

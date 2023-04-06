@@ -1,16 +1,17 @@
 package dev.storozhenko.familybot.feature.vestnik
 
-import dev.storozhenko.familybot.common.extensions.send
-import dev.storozhenko.familybot.common.extensions.sendDeferred
 import dev.storozhenko.familybot.core.executor.CommandExecutor
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
 import dev.storozhenko.familybot.core.services.talking.TranslateService
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.feature.ask_world.AskWorldRepository
+import dev.storozhenko.familybot.telegram.send
+import dev.storozhenko.familybot.telegram.sendDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
@@ -27,7 +28,7 @@ class VestnikCommandExecutor(
 
     override fun command() = Command.VESTNIK
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return { sender ->
             val question = coroutineScope {
                 async {
@@ -46,6 +47,7 @@ class VestnikCommandExecutor(
 
             sender.send(context, context.phrase(Phrase.RANDOM_VESTNIK))
             sender.sendDeferred(context, question, shouldTypeBeforeSend = true)
+            null
         }
     }
 }

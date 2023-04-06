@@ -1,12 +1,13 @@
 package dev.storozhenko.familybot.feature.scenario
 
-import dev.storozhenko.familybot.common.extensions.isFromAdmin
+import dev.storozhenko.familybot.telegram.isFromAdmin
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioService
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioSessionManagementService
 import org.springframework.stereotype.Component
@@ -25,7 +26,7 @@ class ScenarioContinuousExecutor(
 
     override fun command() = Command.SCENARIO
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             val callbackQuery = context.update.callbackQuery
 
@@ -40,9 +41,10 @@ class ScenarioContinuousExecutor(
             } else {
                 val scenarioToStart = scenarioService.getScenarios()
                     .find { (id) -> id.toString() == callbackQuery.data }
-                    ?: throw FamilyBot.InternalException("Can't find a scenario ${callbackQuery.data}")
+                    ?: throw TelegramBot.InternalException("Can't find a scenario ${callbackQuery.data}")
                 scenarioSessionManagementService.startGame(context, scenarioToStart).invoke(it)
             }
+            null
         }
     }
 }

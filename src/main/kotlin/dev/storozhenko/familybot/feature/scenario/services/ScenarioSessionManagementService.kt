@@ -2,18 +2,19 @@ package dev.storozhenko.familybot.feature.scenario.services
 
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.italic
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.common.extensions.toHourMinuteString
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import dev.storozhenko.familybot.getLogger
 import kotlinx.coroutines.delay
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -52,11 +53,11 @@ class ScenarioSessionManagementService(
         }
     }
 
-    fun processCurrentGame(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    fun processCurrentGame(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return currentGame(context)
     }
 
-    fun listGames(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    fun listGames(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             it.send(
                 context,
@@ -68,13 +69,14 @@ class ScenarioSessionManagementService(
                 replyToUpdate = true,
                 customization = createKeyboardMarkup()
             )
+            null
         }
     }
 
-    private fun currentGame(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    private fun currentGame(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val chat = context.chat
         val previousMove = scenarioGameplayService.getCurrentScenarioState(chat)?.move
-            ?: throw FamilyBot.InternalException("Internal logic error, current state wasn't found")
+            ?: throw TelegramBot.InternalException("Internal logic error, current state wasn't found")
         if (previousMove.isEnd) {
             return sendFinal(previousMove, context)
         }
@@ -86,6 +88,7 @@ class ScenarioSessionManagementService(
                     sender,
                     scenarioService.getPreviousMove(previousMove)
                 )
+                null
             }
 
         return { sender ->
@@ -129,6 +132,7 @@ class ScenarioSessionManagementService(
                         )
                     }
             }
+            null
         }
     }
 
@@ -160,7 +164,7 @@ class ScenarioSessionManagementService(
         previousMove: ScenarioMove
     ): String {
         val chosenWay = previousMove.ways.find { it.nextMoveId == nextMove.id }
-            ?: throw FamilyBot.InternalException("Wrong game logic, next move=$nextMove previous=$previousMove")
+            ?: throw TelegramBot.InternalException("Wrong game logic, next move=$nextMove previous=$previousMove")
         return """
             <b>Этап истории:</b> ${previousMove.description.italic()}
             <b>Лидирующий ответ:</b> ${chosenWay.description}
@@ -187,7 +191,7 @@ class ScenarioSessionManagementService(
     private fun sendPoll(
         context: ExecutorContext,
         scenarioMove: ScenarioMove
-    ): suspend (AbsSender) -> Message {
+    ): suspend (AbsSender) -> TelegramMessage {
         return when {
             scenarioMove.ways.any { it.description.length > 100 } -> sendSeparately(scenarioMove, context)
             scenarioMove.description.length > 255 -> sendDescriptionSeparately(scenarioMove, context)
@@ -198,7 +202,7 @@ class ScenarioSessionManagementService(
     private fun sendSeparately(
         scenarioMove: ScenarioMove,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message {
+    ): suspend (AbsSender) -> TelegramMessage {
         val moveDescription = scenarioMove.description
         val scenarioOptions = scenarioMove
             .ways
@@ -223,7 +227,7 @@ class ScenarioSessionManagementService(
     private fun sendDescriptionSeparately(
         scenarioMove: ScenarioMove,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message {
+    ): suspend (AbsSender) -> TelegramMessage {
         val moveDescription = scenarioMove.description
         val scenarioOptions = scenarioMove.ways.map(ScenarioWay::description)
         return {
@@ -242,7 +246,7 @@ class ScenarioSessionManagementService(
     private fun sendInOneMessage(
         scenarioMove: ScenarioMove,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message {
+    ): suspend (AbsSender) -> TelegramMessage {
         val scenarioOptions = scenarioMove.ways.map(ScenarioWay::description)
         return {
             it.execute(
@@ -260,14 +264,15 @@ class ScenarioSessionManagementService(
     private fun sendFinal(
         previousMove: ScenarioMove,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Unit =
+    ): suspend (AbsSender) -> Message? =
         { sender ->
             val evenMorePreviousMove = scenarioService.getPreviousMove(previousMove)
-                ?: throw FamilyBot.InternalException("Scenario seems broken")
+                ?: throw TelegramBot.InternalException("Scenario seems broken")
             sender.send(context, getExpositionMessage(previousMove, evenMorePreviousMove), enableHtml = true)
             delay(2.seconds)
             sender.send(context, previousMove.description)
             delay(2.seconds)
             sender.send(context, context.phrase(Phrase.SCENARIO_END))
+            null
         }
 }

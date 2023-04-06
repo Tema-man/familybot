@@ -1,12 +1,13 @@
 package dev.storozhenko.familybot.feature.ban
 
-import dev.storozhenko.familybot.common.extensions.getMessageTokens
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.feature.ban.service.BanService
+import dev.storozhenko.familybot.telegram.getMessageTokens
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -19,7 +20,7 @@ class BanSomeoneExecutor(
 
     private val banPrefix = "ban|"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val command = context.update.getMessageTokens(delimiter = "|")
         val identification = command[1]
         val isUnban = command.getOrNull(3) == "unban"
@@ -39,6 +40,7 @@ class BanSomeoneExecutor(
                     banService.banChat(chat, description, isForever)
                     it.send(context, "Banned chat: $chat")
                 }
+                null
             }
         }
 
@@ -62,11 +64,14 @@ class BanSomeoneExecutor(
                     banService.banUser(user, description, isForever)
                     it.send(context, "Banned user: $user")
                 }
+
+                null
             }
         }
 
         return {
             it.send(context, "No one found")
+            null
         }
     }
 

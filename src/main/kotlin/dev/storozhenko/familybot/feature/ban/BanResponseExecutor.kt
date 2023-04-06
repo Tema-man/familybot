@@ -1,7 +1,8 @@
 package dev.storozhenko.familybot.feature.ban
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.feature.ban.service.BanService
@@ -13,7 +14,7 @@ class BanResponseExecutor(
     private val banService: BanService
 ) : Executor {
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val banMessage = banService.getChatBan(context)
             ?: banService.getUserBan(context)
             ?: "иди нахуй"
@@ -21,6 +22,7 @@ class BanResponseExecutor(
             if (context.command != null) {
                 it.send(context, banMessage, replyToUpdate = true)
             }
+            null
         }
     }
 

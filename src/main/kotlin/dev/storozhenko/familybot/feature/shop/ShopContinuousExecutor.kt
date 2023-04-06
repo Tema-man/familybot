@@ -1,15 +1,16 @@
 package dev.storozhenko.familybot.feature.shop
 
-import dev.storozhenko.familybot.common.extensions.from
 import dev.storozhenko.familybot.common.extensions.rubles
 import dev.storozhenko.familybot.common.extensions.toJson
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.feature.shop.model.ShopItem
 import dev.storozhenko.familybot.feature.shop.model.ShopPayload
+import dev.storozhenko.familybot.telegram.from
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
 import org.telegram.telegrambots.meta.api.methods.invoices.SendInvoice
@@ -26,13 +27,13 @@ class ShopContinuousExecutor(
 
     override fun command() = Command.SHOP
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
-        val providerToken = botConfig.paymentToken ?: return {}
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+        val providerToken = botConfig.paymentToken ?: return { null }
         val chat = context.chat
 
         val callbackQuery = context.update.callbackQuery
         val shopItem = ShopItem.values().find { item -> callbackQuery.data == item.name }
-            ?: return {}
+            ?: return { null }
 
         return {
             val additionalTax = if (context.update.from().isPremium == true) {
@@ -57,6 +58,7 @@ class ShopContinuousExecutor(
                         listOf(10.rubles(), 20.rubles(), 50.rubles(), 100.rubles())
                 }
             )
+            null
         }
     }
 

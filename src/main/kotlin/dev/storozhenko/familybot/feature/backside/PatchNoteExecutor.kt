@@ -1,12 +1,13 @@
 package dev.storozhenko.familybot.feature.backside
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.send
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,14 +24,15 @@ class PatchNoteExecutor(
     private val patchNotePrefix = "patch_note"
     private val log = getLogger()
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
         if (context.message.isReply.not()) {
-            return { sender -> sender.send(context, "No reply message found, master") }
+            return { sender -> sender.send(context, "No reply message found, master"); null }
         }
         return { sender ->
             val chats = commonRepository.getChats()
             log.info("Sending in {} chats", chats.size)
             chats.forEach { tryToSendMessage(sender, it, context) }
+            null
         }
     }
 

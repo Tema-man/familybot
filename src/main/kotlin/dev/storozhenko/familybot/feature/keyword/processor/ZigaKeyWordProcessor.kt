@@ -1,9 +1,10 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.common.extensions.sendSticker
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.telegram.sendSticker
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.stickers.Sticker
-import dev.storozhenko.familybot.core.telegram.stickers.StickerPack
+import dev.storozhenko.familybot.telegram.stickers.Sticker
+import dev.storozhenko.familybot.telegram.stickers.StickerPack
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -18,7 +19,7 @@ class ZigaKeyWordProcessor : KeyWordProcessor {
         return isRightPack && zigaStickers.any { it.stickerEmoji == incomeSticker.emoji }
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             val stickerToSend =
                 if (context.message.sticker?.emoji == Sticker.LEFT_ZIGA.stickerEmoji) {
@@ -27,6 +28,7 @@ class ZigaKeyWordProcessor : KeyWordProcessor {
                     Sticker.LEFT_ZIGA
                 }
             it.sendSticker(context, stickerToSend, replyToUpdate = true)
+            null
         }
     }
 }

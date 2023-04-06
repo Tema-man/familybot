@@ -1,6 +1,7 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import org.springframework.stereotype.Component
@@ -16,7 +17,7 @@ class SlavaUkraineKeyWordProcessor : KeyWordProcessor {
         return containsUkraineName(text) || containsRussianName(text)
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val text = context.message.text
         val response = if (containsRussianName(text)) {
             "Слава Украине"
@@ -25,6 +26,7 @@ class SlavaUkraineKeyWordProcessor : KeyWordProcessor {
         }
         return {
             it.send(context, response, replyToUpdate = true, shouldTypeBeforeSend = true)
+            null
         }
     }
 

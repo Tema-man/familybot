@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.bet
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.common.extensions.untilNextMonth
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.CommonRepository
@@ -10,10 +10,11 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.services.talking.model.Pluralization
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.feature.pidor.services.PidorCompetitionService
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -47,7 +48,7 @@ class BetContinuousExecutor(
                 (message.replyToMessage.text ?: "") in getDialogMessages(context)
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val user = context.user
         val chatId = context.message.chatId
         val key = context.userAndChatKey
@@ -59,6 +60,7 @@ class BetContinuousExecutor(
                     context.phrase(Phrase.BET_ALREADY_WAS),
                     shouldTypeBeforeSend = true
                 )
+                null
             }
         }
         val number = extractBetNumber(context)
@@ -74,6 +76,7 @@ class BetContinuousExecutor(
                     context.phrase(Phrase.BET_BREAKING_THE_RULES_SECOND),
                     shouldTypeBeforeSend = true
                 )
+                null
             }
         }
         val winnableNumbers = diceNumbers.shuffled().subList(0, 3)
@@ -103,6 +106,7 @@ class BetContinuousExecutor(
             easyKeyValueService.put(BetTolerance, key, true, untilNextMonth())
             delay(2.seconds)
             pidorCompetitionService.pidorCompetition(context.chat, context.chatKey).invoke(it)
+            null
         }
     }
 

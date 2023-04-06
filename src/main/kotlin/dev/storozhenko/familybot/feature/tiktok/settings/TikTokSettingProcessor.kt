@@ -1,12 +1,12 @@
 package dev.storozhenko.familybot.feature.tiktok.settings
 
-import dev.storozhenko.familybot.common.extensions.getMessageTokens
-import dev.storozhenko.familybot.common.extensions.send
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.TikTokDownload
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.feature.settings.processors.SettingProcessor
+import dev.storozhenko.familybot.telegram.getMessageTokens
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 

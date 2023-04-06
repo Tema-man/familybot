@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.common.extensions
 
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.tomlj.Toml
 import org.tomlj.TomlParseResult
 import java.util.concurrent.ThreadLocalRandom
@@ -17,9 +17,9 @@ fun randomBoolean(probability: Long? = null): Boolean {
 }
 
 fun readTomlFromStatic(filename: String): TomlParseResult {
-    val resourceAsStream = FamilyBot::class.java.classLoader
+    val resourceAsStream = TelegramBot::class.java.classLoader
         .getResourceAsStream("static/$filename")
-        ?: throw FamilyBot.InternalException("$filename is missing")
+        ?: throw TelegramBot.InternalException("$filename is missing")
 
     return Toml.parse(resourceAsStream)
 }

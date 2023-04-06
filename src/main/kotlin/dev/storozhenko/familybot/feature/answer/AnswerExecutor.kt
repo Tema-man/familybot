@@ -2,11 +2,12 @@ package dev.storozhenko.familybot.feature.answer
 
 import dev.storozhenko.familybot.common.extensions.capitalized
 import dev.storozhenko.familybot.common.extensions.dropLastDelimiter
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -20,7 +21,7 @@ class AnswerExecutor : CommandExecutor() {
 
     override fun command() = Command.ANSWER
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val text = context.message.text
 
         val message = text
@@ -34,8 +35,9 @@ class AnswerExecutor : CommandExecutor() {
             ?: return {
                 log.info("Bad argument was passed, text of message is [{}]", text)
                 it.send(context, context.phrase(Phrase.BAD_COMMAND_USAGE), replyToUpdate = true)
+                null
             }
-        return { it.send(context, message, replyToUpdate = true, shouldTypeBeforeSend = true) }
+        return { it.send(context, message, replyToUpdate = true, shouldTypeBeforeSend = true); null }
     }
 
     private fun isOptionsCountEnough(options: List<String>) = options.size >= 2

@@ -3,11 +3,12 @@ package dev.storozhenko.familybot.feature.marriage
 import dev.storozhenko.familybot.common.extensions.PluralizedWordsProvider
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.pluralize
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.feature.marriage.model.Marriage
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -62,13 +63,13 @@ class MarryListExecutor(
 
     override fun command() = Command.MARRY_LIST
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val marriages = marriagesRepository.getAllMarriages(context.chat.id)
         if (marriages.isEmpty()) {
-            return { sender -> sender.send(context, context.phrase(Phrase.MARRY_EMPTY_LIST)) }
+            return { sender -> sender.send(context, context.phrase(Phrase.MARRY_EMPTY_LIST)); null }
         } else {
             val marriageList = format(marriages, context)
-            return { sender -> sender.send(context, marriageList, enableHtml = true) }
+            return { sender -> sender.send(context, marriageList, enableHtml = true); null }
         }
     }
 

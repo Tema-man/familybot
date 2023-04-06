@@ -5,7 +5,8 @@ import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard
@@ -25,7 +26,7 @@ class RouletteExecutor : CommandExecutor(), Configurable {
         return Command.ROULETTE
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val chatId = context.update.message.chatId.toString()
 
         return {
@@ -36,6 +37,7 @@ class RouletteExecutor : CommandExecutor(), Configurable {
                         replyToMessageId = context.update.message.messageId
                     }
             )
+            null
         }
     }
 

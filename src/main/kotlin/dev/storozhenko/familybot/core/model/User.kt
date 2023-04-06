@@ -1,4 +1,6 @@
-package dev.storozhenko.familybot.core.telegram.model
+package dev.storozhenko.familybot.core.model
+
+import dev.storozhenko.familybot.core.model.Chat
 
 data class User(val id: Long, val chat: Chat, val name: String?, val nickname: String?) {
 

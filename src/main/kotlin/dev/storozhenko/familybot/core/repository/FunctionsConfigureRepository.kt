@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.common.extensions.key
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.FuckOffOverride
-import dev.storozhenko.familybot.core.telegram.model.Chat
+import dev.storozhenko.familybot.core.model.Chat
 import io.micrometer.core.annotation.Timed
 import org.springframework.stereotype.Component
 

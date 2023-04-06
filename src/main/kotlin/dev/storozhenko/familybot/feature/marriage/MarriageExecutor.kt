@@ -1,23 +1,23 @@
 package dev.storozhenko.familybot.feature.marriage
 
-import dev.storozhenko.familybot.common.extensions.*
+import dev.storozhenko.familybot.common.extensions.key
 import dev.storozhenko.familybot.core.executor.CommandExecutor
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.ProposalTo
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.feature.marriage.model.Marriage
+import dev.storozhenko.familybot.telegram.*
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker
 import org.telegram.telegrambots.meta.api.objects.InputFile
-import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.io.InputStream
-import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 @Component
@@ -27,13 +27,13 @@ class MarriageExecutor(
 ) : CommandExecutor() {
     private val selfSuckStream: InputStream = this::class.java.classLoader
         .getResourceAsStream("static/selfsuck.webp")
-        ?: throw FamilyBot.InternalException("selfsuck.webp is missing")
+        ?: throw TelegramBot.InternalException("selfsuck.webp is missing")
 
     override fun command() = Command.MARRY
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         if (!context.message.isReply) {
-            return { sender -> sender.send(context, context.phrase(Phrase.MARRY_RULES)) }
+            return { sender -> sender.send(context, context.phrase(Phrase.MARRY_RULES)); null }
         }
         val chat = context.chat
         val proposalTarget = context.message.replyToMessage
@@ -47,6 +47,7 @@ class MarriageExecutor(
                         InputFile(selfSuckStream, "selfsuck")
                     ).apply { replyToMessageId = context.message.messageId }
                 )
+                null
             }
         }
         if (proposalTarget.from.isBot) {
@@ -56,6 +57,7 @@ class MarriageExecutor(
                     context.phrase(Phrase.MARRY_PROPOSED_TO_BOT),
                     replyToUpdate = true
                 )
+                null
             }
         }
         if (isMarriedAlready(chat, proposalSource)) {
@@ -65,6 +67,7 @@ class MarriageExecutor(
                     context.phrase(Phrase.MARRY_SOURCE_IS_MARRIED),
                     replyToUpdate = true
                 )
+                null
             }
         }
 
@@ -75,6 +78,7 @@ class MarriageExecutor(
                     context.phrase(Phrase.MARRY_TARGET_IS_MARRIED),
                     replyToUpdate = true
                 )
+                null
             }
         }
         if (isProposedAlready(proposalSource, proposalTarget)) {
@@ -84,6 +88,7 @@ class MarriageExecutor(
                     context.phrase(Phrase.MARRY_PROPOSED_AGAIN),
                     replyToUpdate = true
                 )
+                null
             }
         }
 
@@ -96,22 +101,22 @@ class MarriageExecutor(
     }
 
     private fun isProposedAlready(
-        proposalSource: Message,
-        proposalTarget: Message
+        proposalSource: TelegramMessage,
+        proposalTarget: TelegramMessage
     ): Boolean {
         return keyValueService.get(ProposalTo, proposalTarget.key()) == proposalSource.from.id
     }
 
     private fun isMarriedAlready(
         chat: Chat,
-        proposalSource: Message
+        proposalSource: TelegramMessage
     ) = marriagesRepository.getMarriage(chat.id, proposalSource.from.id) != null
 
     private fun propose(
-        proposalSource: Message,
-        proposalTarget: Message,
+        proposalSource: TelegramMessage,
+        proposalTarget: TelegramMessage,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Unit {
+    ): suspend (AbsSender) -> Message? {
         keyValueService.put(
             ProposalTo,
             key = proposalTarget.key(),
@@ -124,10 +129,11 @@ class MarriageExecutor(
                 context.phrase(Phrase.MARRY_PROPOSED),
                 replyMessageId = proposalTarget.messageId
             )
+            null
         }
     }
 
-    private fun marry(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    private fun marry(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val update = context.update
         val proposalTarget = context.message.replyToMessage.from.toUser(chat = context.chat)
         val proposalSource = context.user
@@ -137,6 +143,6 @@ class MarriageExecutor(
             ProposalTo,
             UserAndChatEasyKey(proposalTarget.id, update.toChat().id)
         )
-        return { sender -> sender.send(context, context.phrase(Phrase.MARRY_CONGRATS)) }
+        return { sender -> sender.send(context, context.phrase(Phrase.MARRY_CONGRATS)); null }
     }
 }

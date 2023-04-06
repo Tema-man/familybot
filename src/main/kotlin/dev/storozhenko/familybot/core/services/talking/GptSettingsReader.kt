@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.services.talking
 
 import dev.storozhenko.familybot.common.extensions.readTomlFromStatic
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 import org.tomlj.TomlTable
 
@@ -29,7 +29,7 @@ class GptSettingsReader {
     }
 
     private fun getTable(toml: TomlTable, name: String): TomlTable {
-        return toml.getTable(name) ?: throw FamilyBot.InternalException("No $name table in gpt.toml")
+        return toml.getTable(name) ?: throw TelegramBot.InternalException("No $name table in gpt.toml")
     }
 
     fun getUniverseValue(universe: GptUniverse): String {

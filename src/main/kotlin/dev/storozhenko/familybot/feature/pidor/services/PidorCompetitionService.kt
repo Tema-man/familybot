@@ -1,17 +1,17 @@
 package dev.storozhenko.familybot.feature.pidor.services
 
 import dev.storozhenko.familybot.common.extensions.bold
-import dev.storozhenko.familybot.common.extensions.sendContextFree
+import dev.storozhenko.familybot.telegram.sendContextFree
 import dev.storozhenko.familybot.common.extensions.startOfCurrentMonth
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
 import kotlinx.coroutines.delay
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -74,7 +74,7 @@ class PidorCompetitionService(
         val maxCount = pidorsByUser
             .mapValues { it.value.size }
             .maxByOrNull(Map.Entry<User, Int>::value)
-            ?: throw FamilyBot.InternalException("List of pidors for competition should be never null")
+            ?: throw TelegramBot.InternalException("List of pidors for competition should be never null")
 
         return pidorsByUser
             .filterValues { it.size == maxCount.value }

@@ -1,10 +1,11 @@
 package dev.storozhenko.familybot.feature.help
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -13,7 +14,7 @@ class HelpCommandExecutor : CommandExecutor() {
 
     override fun command() = Command.HELP
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             it.send(
                 context,
@@ -24,6 +25,7 @@ class HelpCommandExecutor : CommandExecutor() {
                     disableNotification = true
                 }
             )
+            null
         }
     }
 }

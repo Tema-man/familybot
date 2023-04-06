@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.scenario.services
 
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import java.time.Instant
 import java.util.UUID
 
@@ -32,11 +32,11 @@ data class ScenarioMoveVoteResult(
 )
 
 data class ScenarioPoll(
-  val pollId: String,
-  val chat: Chat,
-  val createDate: Instant,
-  val scenarioMove: ScenarioMove,
-  val messageId: Int
+    val pollId: String,
+    val chat: Chat,
+    val createDate: Instant,
+    val scenarioMove: ScenarioMove,
+    val messageId: Int
 )
 
 data class ScenarioState(

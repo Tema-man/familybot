@@ -1,11 +1,12 @@
 package dev.storozhenko.familybot.feature.tiktok
 
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.TikTokDownload
-import dev.storozhenko.familybot.core.telegram.BotConfig
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
@@ -22,7 +23,7 @@ class TikTokDownloadExecutor(
 ) : Executor {
     private val log = getLogger()
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val urls = getTikTokUrls(context)
         return { sender ->
             urls.forEach { url ->
@@ -37,6 +38,7 @@ class TikTokDownloadExecutor(
                 sender.execute(video)
                 downloadedFile.delete()
             }
+            null
         }
     }
 

@@ -2,12 +2,12 @@ package dev.storozhenko.familybot.common.extensions
 
 import dev.storozhenko.familybot.feature.marriage.model.Marriage
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestion
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.CommandByUser
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.CommandByUser
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.telegram.TelegramBot
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -35,7 +35,7 @@ fun ResultSet.toCommandByUser(user: User?): CommandByUser {
     val command = Command
         .values()
         .find { it.id == this.getInt("command_id") }
-        ?: throw FamilyBot.InternalException("Command id should exist")
+        ?: throw TelegramBot.InternalException("Command id should exist")
     return CommandByUser(
         userInternal,
         command,

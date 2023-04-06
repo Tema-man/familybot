@@ -3,10 +3,12 @@ package dev.storozhenko.familybot.feature.global_time
 import dev.storozhenko.familybot.common.extensions.DateConstants
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.code
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.message.SimpleTextMessage
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
@@ -34,7 +36,7 @@ class TimeExecutor : CommandExecutor() {
 
     override fun command() = Command.TIME
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val now = Instant.now()
         val result = times.map { (prefix, zone) -> prefix to now.atZone(zone) }
             .sortedBy { (_, time) -> time }
@@ -44,6 +46,7 @@ class TimeExecutor : CommandExecutor() {
         return {
             it.me
             it.send(context, "$result\n${getMortgageDate()}", replyToUpdate = true, enableHtml = true)
+            null
         }
     }
 

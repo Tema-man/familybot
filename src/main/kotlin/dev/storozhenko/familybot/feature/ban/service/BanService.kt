@@ -6,8 +6,8 @@ import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.Ban
 import dev.storozhenko.familybot.core.services.settings.EasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import org.springframework.stereotype.Component
 import java.time.Instant
 import kotlin.time.Duration

@@ -1,9 +1,9 @@
 package dev.storozhenko.familybot.feature.shop.model
 
-import dev.storozhenko.familybot.common.extensions.from
 import dev.storozhenko.familybot.common.extensions.rubles
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
+import dev.storozhenko.familybot.telegram.from
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
 

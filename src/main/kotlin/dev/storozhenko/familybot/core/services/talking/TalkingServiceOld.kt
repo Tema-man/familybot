@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.core.repository.ChatLogRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.User
 import io.micrometer.core.annotation.Timed
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

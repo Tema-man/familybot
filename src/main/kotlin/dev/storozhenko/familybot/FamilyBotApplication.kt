@@ -1,8 +1,8 @@
 package dev.storozhenko.familybot
 
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.BotStarter
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.BotStarter
+import dev.storozhenko.familybot.telegram.TelegramBot
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.Logger
@@ -64,7 +64,7 @@ class FamilyBotApplication(
     }
 
     private fun requireValue(value: String, valueName: String): String =
-        value.ifBlank { throw FamilyBot.InternalException("Value of '$valueName' must be not empty") }
+        value.ifBlank { throw TelegramBot.InternalException("Value of '$valueName' must be not empty") }
 
     private fun optionalValue(value: () -> String?, log: String): String? =
         value()

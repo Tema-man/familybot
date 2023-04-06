@@ -16,8 +16,8 @@ import dev.storozhenko.familybot.core.services.settings.ChatGPTStyle
 import dev.storozhenko.familybot.core.services.settings.ChatGPTTokenUsageByChat
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.talking.TalkingService
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.*
@@ -93,7 +93,7 @@ class TalkingServiceChatGpt(
         context: ExecutorContext
     ): MutableList<ChatMessage> {
         val chatId = context.chat.idString
-        val cache = caches[style] ?: throw FamilyBot.InternalException("Internal logic error, check logs")
+        val cache = caches[style] ?: throw TelegramBot.InternalException("Internal logic error, check logs")
         var chatMessages = cache.get(chatId)
 
         if (chatMessages.size > 11) {

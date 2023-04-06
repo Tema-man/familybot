@@ -1,22 +1,27 @@
 package dev.storozhenko.familybot.feature.pidor
 
 import dev.storozhenko.familybot.common.extensions.*
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
 import dev.storozhenko.familybot.feature.pidor.services.PidorCompetitionService
 import dev.storozhenko.familybot.feature.pidor.services.PidorStrikesService
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.send
+import dev.storozhenko.familybot.telegram.sendContextFree
+import dev.storozhenko.familybot.telegram.toUser
+import dev.storozhenko.familybot.telegram.user
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -44,7 +49,7 @@ class PidorExecutor(
 
     override fun command(): Command = Command.PIDOR
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val chat = context.chat
         if (context.message.isReply) {
             return pickPidor(context)
@@ -58,7 +63,7 @@ class PidorExecutor(
         chat: Chat,
         key: ChatEasyKey,
         silent: Boolean = false
-    ): Pair<(suspend (AbsSender) -> Unit), Boolean> {
+    ): Pair<(suspend (AbsSender) -> Message?), Boolean> {
         val users = repository.getUsers(chat, activeOnly = true)
 
         val pidorToleranceValue = easyKeyValueService.get(PidorTolerance, key)
@@ -67,10 +72,10 @@ class PidorExecutor(
             if (!silent) {
                 val message = getMessageForPidors(chat, key)
                 if (message != null) {
-                    return Pair({ it.execute(message) }, false)
+                    return Pair({ it.execute(message); null }, false)
                 }
             } else {
-                return Pair({ }, false)
+                return Pair({ null }, false)
             }
         }
         return Pair({ sender ->
@@ -116,6 +121,7 @@ class PidorExecutor(
             }
             pidorStrikesService.calculateStrike(chat, key, pidor).invoke(sender)
             pidorCompetitionService.pidorCompetition(chat, key).invoke(sender)
+            null
         }, true)
     }
 
@@ -233,7 +239,7 @@ class PidorExecutor(
         }.getOrNull()
     }
 
-    private fun pickPidor(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    private fun pickPidor(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val abilityCount = easyKeyValueService.get(PickPidorAbilityCount, context.userKey, 0L)
         if (abilityCount <= 0L) {
             return {
@@ -243,6 +249,7 @@ class PidorExecutor(
                     shouldTypeBeforeSend = true,
                     replyToUpdate = true
                 )
+                null
             }
         }
         val replyMessage = context.message.replyToMessage
@@ -256,6 +263,7 @@ class PidorExecutor(
                         shouldTypeBeforeSend = true,
                         replyToUpdate = true
                     )
+                    null
                 }
             } else {
                 return {
@@ -265,6 +273,7 @@ class PidorExecutor(
                         shouldTypeBeforeSend = true,
                         replyToUpdate = true
                     )
+                    null
                 }
             }
         }
@@ -291,6 +300,7 @@ class PidorExecutor(
                     replyToUpdate = true,
                     enableHtml = true
                 )
+                null
             } else {
                 it.send(
                     context,
@@ -299,6 +309,7 @@ class PidorExecutor(
                     shouldTypeBeforeSend = true,
                     replyToUpdate = true
                 )
+                null
             }
         }
     }

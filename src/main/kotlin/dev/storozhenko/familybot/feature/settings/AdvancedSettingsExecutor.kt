@@ -1,14 +1,15 @@
 package dev.storozhenko.familybot.feature.settings
 
-import dev.storozhenko.familybot.common.extensions.getMessageTokens
-import dev.storozhenko.familybot.common.extensions.isFromAdmin
-import dev.storozhenko.familybot.common.extensions.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.feature.settings.processors.SettingProcessor
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.getMessageTokens
+import dev.storozhenko.familybot.telegram.isFromAdmin
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -21,13 +22,14 @@ class AdvancedSettingsExecutor(
 
     private val log = getLogger()
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val messageTokens = context.update.getMessageTokens()
         if (messageTokens.size == 1) {
             return {
                 it.send(
                     context, context.phrase(Phrase.ADVANCED_SETTINGS), enableHtml = true
                 )
+                null
             }
         }
         return {
@@ -44,6 +46,7 @@ class AdvancedSettingsExecutor(
                     sendErrorMessage(context)
                 }.invoke(it)
             }
+            null
         }
     }
 

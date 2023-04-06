@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.quote
 
 import dev.storozhenko.familybot.common.extensions.readTomlFromStatic
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 import org.tomlj.TomlTable
 
@@ -14,7 +14,7 @@ class QuoteRepository {
         val toml = readTomlFromStatic("quotes.toml")
 
         val rawArray = toml.getArray("quotes")
-            ?: throw FamilyBot.InternalException("quotes.toml is missing quotes array")
+            ?: throw TelegramBot.InternalException("quotes.toml is missing quotes array")
         quotes = rawArray.toList()
             .map { row -> map(row as TomlTable) }
             .groupBy(Pair<String, String>::first, Pair<String, String>::second)
@@ -25,7 +25,7 @@ class QuoteRepository {
         val tag = row["tag"] as String?
         val quote = row["quote"] as String?
         if (tag == null || quote == null) {
-            throw FamilyBot.InternalException("quotes.toml is invalid, current row is $row")
+            throw TelegramBot.InternalException("quotes.toml is invalid, current row is $row")
         }
         return tag to quote
     }

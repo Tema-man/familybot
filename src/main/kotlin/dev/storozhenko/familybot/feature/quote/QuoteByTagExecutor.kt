@@ -1,10 +1,11 @@
 package dev.storozhenko.familybot.feature.quote
 
 import dev.storozhenko.familybot.common.extensions.capitalized
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
@@ -17,7 +18,7 @@ class QuoteByTagExecutor(private val quoteRepository: QuoteRepository) : Command
 
     override fun command() = Command.QUOTE_BY_TAG
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             val rows = quoteRepository
                 .getTags()
@@ -32,6 +33,7 @@ class QuoteByTagExecutor(private val quoteRepository: QuoteRepository) : Command
                 replyToUpdate = true,
                 customization = { replyMarkup = InlineKeyboardMarkup(rows) }
             )
+            null
         }
     }
 }

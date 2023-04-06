@@ -1,13 +1,14 @@
 package dev.storozhenko.familybot.feature.backside
 
-import dev.storozhenko.familybot.common.extensions.getMessageTokens
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.telegram.getMessageTokens
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -19,7 +20,7 @@ class FindUserExecutor(
     private val delimiter = "\n===================\n"
     override fun getMessagePrefix() = "user|"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val tokens = context.update.getMessageTokens("|")
         val usersToChats = commonRepository
             .findUsersByName(tokens[1])
@@ -33,6 +34,7 @@ class FindUserExecutor(
                     sender.send(context, format(chunk))
                 }
             }
+            null
         }
     }
 

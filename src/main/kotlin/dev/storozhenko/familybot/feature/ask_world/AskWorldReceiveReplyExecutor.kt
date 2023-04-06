@@ -2,28 +2,29 @@ package dev.storozhenko.familybot.feature.ask_world
 
 import dev.storozhenko.familybot.common.extensions.boldNullable
 import dev.storozhenko.familybot.common.extensions.italic
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.model.MessageContentType
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.MessageContentType
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldReply
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.telegram.send
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.*
 import org.telegram.telegrambots.meta.api.objects.InputFile
-import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Instant
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 
 @Component
 class AskWorldReceiveReplyExecutor(
@@ -61,15 +62,15 @@ class AskWorldReceiveReplyExecutor(
         return Priority.LOW
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
-        val message = context.message
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+        val message: TelegramMessage = context.message
         val reply = message.text ?: "MEDIA: $message"
         val chat = context.chat
         val user = context.user
         val chatId = chat.id
         val messageId = message.replyToMessage.messageId
         val question =
-            askWorldRepository.findQuestionByMessageId(messageId + chatId, chatId) ?: return {}
+            askWorldRepository.findQuestionByMessageId(messageId + chatId, chatId) ?: return { null }
         if (askWorldRepository.isReplied(question, chat, user)) {
             return {
                 it.execute(
@@ -80,13 +81,14 @@ class AskWorldReceiveReplyExecutor(
                         replyToMessageId = message.messageId
                     }
                 )
+                null
             }
         }
         val contentType = detectContentType(message)
         val askWorldReply = AskWorldReply(
             null,
             question.id
-                ?: throw FamilyBot.InternalException("Question id is missing, seems like internal logic error"),
+                ?: throw TelegramBot.InternalException("Question id is missing, seems like internal logic error"),
             reply,
             user,
             chat,
@@ -126,6 +128,7 @@ class AskWorldReceiveReplyExecutor(
                 sender.send(context, "Принято")
                 log.info("Could not send reply instantly", e)
             }
+            null
         }
     }
 
@@ -133,7 +136,7 @@ class AskWorldReceiveReplyExecutor(
         sender: AbsSender,
         contentType: MessageContentType,
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ) {
         when (contentType) {
             MessageContentType.PHOTO ->
@@ -165,7 +168,7 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendVideo(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendVideo {
         return SendVideo(
             chatIdToReply,
@@ -179,7 +182,7 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendContact(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendContact {
         return SendContact(
             chatIdToReply,
@@ -192,14 +195,14 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendSticker(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendSticker {
         return SendSticker(chatIdToReply, InputFile(message.sticker.fileId))
     }
 
     private fun sendLocation(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendLocation {
         return SendLocation(
             chatIdToReply,
@@ -210,21 +213,21 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendVideoNote(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendVideoNote {
         return SendVideoNote(chatIdToReply, InputFile(message.videoNote.fileId))
     }
 
     private fun sendVoice(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendVoice {
         return SendVoice(chatIdToReply, InputFile(message.voice.fileId))
     }
 
     private fun sendDocument(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendDocument {
         return SendDocument(chatIdToReply, InputFile(message.document.fileId)).apply {
             if (message.hasText()) {
@@ -235,14 +238,14 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendAnimation(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendAnimation {
         return SendAnimation(chatIdToReply, InputFile(message.animation.fileId))
     }
 
     private fun sendAudio(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendAudio {
         return SendAudio(
             chatIdToReply,
@@ -256,7 +259,7 @@ class AskWorldReceiveReplyExecutor(
 
     private fun sendPhoto(
         chatIdToReply: String,
-        message: Message
+        message: TelegramMessage
     ): SendPhoto {
         return SendPhoto(chatIdToReply, InputFile(message.photo.first().fileId))
             .apply {
@@ -303,7 +306,7 @@ class AskWorldReceiveReplyExecutor(
         )
     }
 
-    private fun detectContentType(message: Message): MessageContentType {
+    private fun detectContentType(message: TelegramMessage): MessageContentType {
         return when {
             message.hasLocation() -> MessageContentType.LOCATION
             message.hasAnimation() -> MessageContentType.ANIMATION

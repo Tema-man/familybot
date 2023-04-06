@@ -1,15 +1,16 @@
 package dev.storozhenko.familybot.feature.user_enter_exit
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
@@ -21,7 +22,7 @@ class UserEnterExitExecutor(
 
     override fun priority(context: ExecutorContext) = Priority.LOW
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val message = context.message
         val phrase = when {
             isUserLeft(message) -> Phrase.USER_LEAVING_CHAT
@@ -35,15 +36,16 @@ class UserEnterExitExecutor(
                 replyToUpdate = true,
                 shouldTypeBeforeSend = true
             )
+            null
         }
     }
 
     override fun canExecute(context: ExecutorContext) =
         isUserLeft(context.message) || isUserEntered(context.message)
 
-    private fun isUserLeft(message: Message) = message.leftChatMember != null
-    private fun isUserEntered(message: Message) = message.newChatMembers?.isNotEmpty() ?: false
-    private fun isNewChat(message: Message) =
+    private fun isUserLeft(message: TelegramMessage) = message.leftChatMember != null
+    private fun isUserEntered(message: TelegramMessage) = message.newChatMembers?.isNotEmpty() ?: false
+    private fun isNewChat(message: TelegramMessage) =
         message.newChatMembers.any { it.isBot && it.userName == botConfig.botName }
 
 }

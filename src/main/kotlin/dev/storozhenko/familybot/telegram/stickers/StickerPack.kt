@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.core.telegram.stickers
+package dev.storozhenko.familybot.telegram.stickers
 
 enum class StickerPack(val packName: String) {
     FAMILY_PACK("FamiliGayPack"),

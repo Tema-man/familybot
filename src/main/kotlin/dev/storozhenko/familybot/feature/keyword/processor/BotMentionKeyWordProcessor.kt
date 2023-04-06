@@ -5,16 +5,16 @@ import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.FuckOffOverride
 import dev.storozhenko.familybot.core.services.settings.FuckOffTolerance
-import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
-import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
-import dev.storozhenko.familybot.common.extensions.sendDeferred
+import dev.storozhenko.familybot.telegram.sendDeferred
 import dev.storozhenko.familybot.core.services.talking.TalkingService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -38,10 +38,10 @@ class BotMentionKeyWordProcessor(
 
     override fun canProcess(context: ExecutorContext): Boolean {
         val message = context.message
-        return isReplyToBot(message) || isBotMention(message) || isBotNameMention(message)
+        return !message.isCommand && (isReplyToBot(message) || isBotMention(message) || isBotNameMention(message))
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
         if (isFuckOff(context)) {
             return fuckOff(context)
         }
@@ -56,21 +56,22 @@ class BotMentionKeyWordProcessor(
                 }
                 it.sendDeferred(context, reply, replyToUpdate = true, shouldTypeBeforeSend = true, enableHtml = true)
             }
+            null
         }
     }
 
-    private fun isBotMention(message: Message): Boolean {
+    private fun isBotMention(message: TelegramMessage): Boolean {
         return message.text?.contains("@${botConfig.botName}") ?: false
     }
 
-    private fun isBotNameMention(message: Message): Boolean {
+    private fun isBotNameMention(message: TelegramMessage): Boolean {
         val text = message.text ?: return false
 
         return botConfig
             .botNameAliases.any { alias -> text.contains(alias, ignoreCase = true) }
     }
 
-    private fun isReplyToBot(message: Message): Boolean {
+    private fun isReplyToBot(message: TelegramMessage): Boolean {
         return message.isReply && message.replyToMessage.from.userName == botConfig.botName
     }
 
@@ -83,10 +84,10 @@ class BotMentionKeyWordProcessor(
         }
     }
 
-    fun fuckOff(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    fun fuckOff(context: ExecutorContext): suspend (AbsSender) -> Message? {
         easyKeyValueService.put(FuckOffOverride, context.chatKey, true, defaultFuckOffDuration)
         easyKeyValueService.put(FuckOffTolerance, context.userAndChatKey, true, defaultToleranceDuration)
-        return {}
+        return {null}
     }
 
     private fun isUserUnderTolerance(context: ExecutorContext) =

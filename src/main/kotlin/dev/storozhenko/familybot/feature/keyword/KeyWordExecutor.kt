@@ -3,6 +3,7 @@ package dev.storozhenko.familybot.feature.keyword
 import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
@@ -21,8 +22,8 @@ class KeyWordExecutor(val processors: List<KeyWordProcessor>) : Executor, Config
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.TALK_BACK
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit =
-        processorsForMessage.remove(context.message.messageId)?.process(context) ?: {}
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? =
+        processorsForMessage.remove(context.message.messageId)?.process(context) ?: { null }
 
     override fun canExecute(context: ExecutorContext): Boolean {
         val message = context.message

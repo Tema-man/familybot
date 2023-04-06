@@ -5,9 +5,9 @@ import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.UserEasyKey
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.User
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 

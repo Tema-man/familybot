@@ -5,9 +5,9 @@ import dev.storozhenko.familybot.common.extensions.map
 import dev.storozhenko.familybot.common.extensions.toChat
 import dev.storozhenko.familybot.common.extensions.toPidor
 import dev.storozhenko.familybot.common.extensions.toUser
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
 import io.micrometer.core.annotation.Timed
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.ResultSetExtractor

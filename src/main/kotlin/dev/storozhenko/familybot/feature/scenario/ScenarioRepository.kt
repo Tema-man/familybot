@@ -4,14 +4,14 @@ import dev.storozhenko.familybot.common.extensions.getUuid
 import dev.storozhenko.familybot.common.extensions.toChat
 import dev.storozhenko.familybot.common.extensions.toUser
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.feature.scenario.services.Scenario
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioMove
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioPoll
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioState
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioWay
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import io.micrometer.core.annotation.Timed
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
@@ -108,7 +108,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
               INNER JOIN scenario_move sm ON sm.move_id = move2way.move_id
               WHERE way_id IN
              (SELECT scenario_way.way_id FROM scenario_way WHERE next_move_id = :move_id)
-            
+
         """,
             mapOf("move_id" to move.id)
         ) { rs, rowNum -> scenarioMoveRowMapper.mapRowNotNull(rs, rowNum) }.firstOrNull()
@@ -152,7 +152,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
             )
         } catch (e: DataIntegrityViolationException) {
             log.warn("DataIntegrityViolationException on voting, probably the vote was forwarded", e)
-            throw FamilyBot.InternalException("User is probably unknown")
+            throw TelegramBot.InternalException("User is probably unknown")
         }
     }
 
@@ -181,7 +181,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
             SELECT * FROM scenario_choices sc
             INNER JOIN users u ON sc.user_id = u.id
             INNER JOIN scenario_way sw ON sw.way_id = sc.scenario_way_id
-            WHERE chat_id = :chat_id AND scenario_way_id IN (:ids) 
+            WHERE chat_id = :chat_id AND scenario_way_id IN (:ids)
             AND choice_date > :state_date
             """,
             mapOf(
@@ -210,7 +210,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
     @Timed("repository.PostgresScenarioRepository.getDataByPollId")
     fun getDataByPollId(id: String): ScenarioPoll? {
         return template.query(
-            """SELECT * FROM scenario_poll 
+            """SELECT * FROM scenario_poll
             INNER JOIN chats c ON scenario_poll.chat_id = c.id
             INNER JOIN scenario_move sm ON scenario_poll.scenario_move_id = sm.move_id
             WHERE poll_id = :poll_id
@@ -241,7 +241,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
     fun getAllStatesOfChat(chat: Chat): List<ScenarioState> {
         return template.query(
             """
-            SELECT * FROM scenario_states 
+            SELECT * FROM scenario_states
             INNER JOIN scenario_move sm ON scenario_states.scenario_move_id = sm.move_id
             WHERE chat_id = :chat_id
         """,
@@ -253,7 +253,7 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
     private fun findScenarioWays(moveId: UUID): List<ScenarioWay> {
         return template.query(
             """
-            SELECT sw.way_id AS scenario_way_id, sm.move_id AS scenario_move_id, sw.* FROM move2way m2w  
+            SELECT sw.way_id AS scenario_way_id, sm.move_id AS scenario_move_id, sw.* FROM move2way m2w
             INNER JOIN scenario_way sw ON m2w.way_id = sw.way_id
             INNER JOIN scenario_move sm ON m2w.move_id = sm.move_id
             WHERE sm.move_id = :move_id
@@ -264,6 +264,6 @@ class ScenarioRepository(jdbcTemplate: JdbcTemplate) {
     }
 
     private fun <T> RowMapper<T>.mapRowNotNull(rs: ResultSet, rowNumber: Int): T {
-        return mapRow(rs, rowNumber) ?: throw FamilyBot.InternalException("Can't find required field")
+        return mapRow(rs, rowNumber) ?: throw TelegramBot.InternalException("Can't find required field")
     }
 }

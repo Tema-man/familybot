@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.core.executor
 
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
-import dev.storozhenko.familybot.core.telegram.BotConfig
+import dev.storozhenko.familybot.core.bot.BotConfig
 
 abstract class ContinuousConversationExecutor(private val config: BotConfig) : CommandExecutor() {
 

@@ -6,9 +6,9 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.DictionaryReader
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.stickers.Sticker
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.telegram.stickers.Sticker
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock

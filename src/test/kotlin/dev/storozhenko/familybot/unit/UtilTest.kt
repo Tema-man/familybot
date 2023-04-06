@@ -2,8 +2,8 @@ package dev.storozhenko.familybot.unit
 
 import dev.storozhenko.familybot.common.extensions.*
 import dev.storozhenko.familybot.core.services.talking.model.Pluralization
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.infrastructure.randomLong
 import dev.storozhenko.familybot.infrastructure.randomString
 import org.junit.jupiter.api.Assertions

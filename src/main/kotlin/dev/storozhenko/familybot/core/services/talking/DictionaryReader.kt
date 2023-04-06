@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.core.services.talking
 import dev.storozhenko.familybot.common.extensions.readTomlFromStatic
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.services.talking.model.PhraseTheme
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 import org.tomlj.TomlTable
 
@@ -17,7 +17,7 @@ class DictionaryReader {
         dictionary = Phrase.values()
             .map { phrase ->
                 phrase to (toml.getTable(phrase.name)
-                    ?: throw FamilyBot.InternalException("Phrase $phrase is missing"))
+                    ?: throw TelegramBot.InternalException("Phrase $phrase is missing"))
             }
             .associate { (phrase, table) -> phrase to parsePhrasesByTheme(table) }
         checkDefaults(dictionary)
@@ -28,7 +28,7 @@ class DictionaryReader {
         val requiredPhrases = phrasesByTheme[theme]
         return if (requiredPhrases.isNullOrEmpty()) {
             phrasesByTheme[PhraseTheme.DEFAULT]
-                ?: throw FamilyBot.InternalException("Default value for phrase $phrase is missing")
+                ?: throw TelegramBot.InternalException("Default value for phrase $phrase is missing")
         } else {
             requiredPhrases
         }
@@ -41,7 +41,7 @@ class DictionaryReader {
 
     private fun getPhraseContent(phrase: Phrase): Map<PhraseTheme, List<String>> {
         return dictionary[phrase]
-            ?: throw FamilyBot.InternalException("Phrase $phrase is missing")
+            ?: throw TelegramBot.InternalException("Phrase $phrase is missing")
     }
 
     private fun parsePhrasesByTheme(table: TomlTable): Map<PhraseTheme, List<String>> {
@@ -68,7 +68,7 @@ class DictionaryReader {
             .map { (key) -> key }
 
         if (missingDefaultPhrases.isNotEmpty()) {
-            throw FamilyBot.InternalException(
+            throw TelegramBot.InternalException(
                 "Some dictionary defaults missing. " +
                         "Check $missingDefaultPhrases"
             )

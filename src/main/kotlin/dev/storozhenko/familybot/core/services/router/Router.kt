@@ -1,13 +1,17 @@
 package dev.storozhenko.familybot.core.services.router
 
-import dev.storozhenko.familybot.common.extensions.*
+import dev.storozhenko.familybot.common.extensions.key
+import dev.storozhenko.familybot.common.extensions.prettyFormat
 import dev.storozhenko.familybot.common.meteredCanExecute
 import dev.storozhenko.familybot.common.meteredExecute
 import dev.storozhenko.familybot.common.meteredPriority
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
 import dev.storozhenko.familybot.core.executor.PrivateMessageExecutor
+import dev.storozhenko.familybot.core.model.CommandByUser
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.core.repository.ChatLogRepository
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.repository.CommonRepository
@@ -17,20 +21,20 @@ import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.CommandByUser
 import dev.storozhenko.familybot.feature.security.AntiDdosExecutor
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.context
+import dev.storozhenko.familybot.telegram.send
+import dev.storozhenko.familybot.telegram.toChat
+import dev.storozhenko.familybot.telegram.toUser
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.User
 import org.telegram.telegrambots.meta.bots.AbsSender
-import java.time.Duration
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
@@ -55,7 +59,7 @@ class Router(
         logger.error("Exception in logging job", exception)
     }
 
-    suspend fun processUpdate(update: Update): suspend (AbsSender) -> Unit {
+    suspend fun processUpdate(update: Update): suspend (AbsSender) -> Message? {
         val message = update.message
             ?: update.editedMessage
             ?: update.callbackQuery.message
@@ -67,7 +71,7 @@ class Router(
             logger.warn("Someone is sending private messages: $update")
         } else {
             registerUpdate(message, update)
-            if (update.hasEditedMessage()) return {}
+            if (update.hasEditedMessage()) return { null }
         }
 
         val context = update.context(botConfig, dictionary)
@@ -78,7 +82,7 @@ class Router(
             when (executor) {
                 is CommandExecutor -> disabledCommand(context)
                 is AntiDdosExecutor -> antiDdosSkip(context)
-                else -> { _ -> }
+                else -> { _ -> null }
             }
         } else {
             executor.meteredExecute(context, meterRegistry)
@@ -109,7 +113,7 @@ class Router(
     }
 
     private fun registerUpdate(
-        message: Message,
+        message: TelegramMessage,
         update: Update
     ) {
         register(message)
@@ -134,11 +138,11 @@ class Router(
         logChatMessage(context)
     }
 
-    private fun antiDdosSkip(context: ExecutorContext): suspend (AbsSender) -> Unit =
+    private fun antiDdosSkip(context: ExecutorContext): suspend (AbsSender) -> Message? =
         marker@{ it ->
             val executor = executors
                 .filterIsInstance<CommandExecutor>()
-                .find { it.meteredCanExecute(context, meterRegistry) } ?: return@marker
+                .find { it.meteredCanExecute(context, meterRegistry) } ?: return@marker null
             val function = if (isExecutorDisabled(executor, context)) {
                 disabledCommand(context)
             } else {
@@ -146,11 +150,12 @@ class Router(
             }
 
             function.invoke(it)
+            null
         }
 
-    private fun disabledCommand(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    private fun disabledCommand(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val phrase = context.phrase(Phrase.COMMAND_IS_OFF)
-        return { it -> it.send(context, phrase) }
+        return { it -> it.send(context, phrase); null }
     }
 
     private fun isExecutorDisabled(executor: Executor, context: ExecutorContext): Boolean {
@@ -207,7 +212,7 @@ class Router(
         chatLogRepository.add(context.user, text)
     }
 
-    private fun register(message: Message) {
+    private fun register(message: TelegramMessage) {
         val chat = message.chat.toChat()
 
         repository.addChat(chat)

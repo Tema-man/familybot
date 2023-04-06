@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.getLogger
 import dev.storozhenko.familybot.feature.shop.model.PreCheckOutResponse
 import dev.storozhenko.familybot.feature.shop.model.ShopPayload
 import dev.storozhenko.familybot.feature.shop.model.SuccessPaymentResponse
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 
 @Component
@@ -25,7 +25,7 @@ class PaymentService(
     private fun getProcessor(shopPayload: ShopPayload): PaymentProcessor {
         val paymentProcessor = (
             processors[shopPayload.shopItem]
-                ?: throw FamilyBot.InternalException("Can't find proper payment processor for ${shopPayload.shopItem}")
+                ?: throw TelegramBot.InternalException("Can't find proper payment processor for ${shopPayload.shopItem}")
             )
         log.info("Payment processor for shopPayload=$shopPayload is ${paymentProcessor::class.java.simpleName}")
         return paymentProcessor

@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.core.telegram.model
+package dev.storozhenko.familybot.core.model
 
 import java.time.Instant
 

@@ -1,14 +1,15 @@
 package dev.storozhenko.familybot.feature.settings
 
-import dev.storozhenko.familybot.common.extensions.isFromAdmin
+import dev.storozhenko.familybot.telegram.isFromAdmin
 import dev.storozhenko.familybot.common.extensions.toEmoji
 import dev.storozhenko.familybot.core.executor.ContinuousConversationExecutor
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery
@@ -30,7 +31,7 @@ class SettingsContinuousExecutor(
         return context.allPhrases(Phrase.WHICH_SETTING_SHOULD_CHANGE)
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return {
             val chat = context.chat
             val callbackQuery = context.update.callbackQuery
@@ -71,6 +72,7 @@ class SettingsContinuousExecutor(
                     )
                 }
             }
+            null
         }
     }
 }

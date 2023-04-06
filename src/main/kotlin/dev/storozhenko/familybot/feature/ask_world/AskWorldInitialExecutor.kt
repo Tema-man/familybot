@@ -1,8 +1,14 @@
 package dev.storozhenko.familybot.feature.ask_world
 
-import dev.storozhenko.familybot.common.extensions.*
+import dev.storozhenko.familybot.common.extensions.boldNullable
+import dev.storozhenko.familybot.common.extensions.italic
+import dev.storozhenko.familybot.common.extensions.key
+import dev.storozhenko.familybot.common.extensions.untilNextDay
+import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
@@ -13,14 +19,12 @@ import dev.storozhenko.familybot.core.services.settings.AskWorldUserUsages
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestion
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestionData
 import dev.storozhenko.familybot.feature.ask_world.model.Success
 import dev.storozhenko.familybot.feature.ask_world.model.ValidationError
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.send
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage
@@ -45,7 +49,7 @@ class AskWorldInitialExecutor(
 
     override fun command() = Command.ASK_WORLD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> dev.storozhenko.familybot.core.model.message.Message? {
         val currentChat = context.chat
 
         val chatKey = context.chatKey
@@ -62,6 +66,7 @@ class AskWorldInitialExecutor(
                         context.phrase(Phrase.ASK_WORLD_LIMIT_BY_CHAT),
                         replyToUpdate = true
                     )
+                    null
                 }
             }
 
@@ -73,6 +78,7 @@ class AskWorldInitialExecutor(
                         context.phrase(Phrase.ASK_WORLD_LIMIT_BY_USER),
                         replyToUpdate = true
                     )
+                    null
                 }
             }
         }
@@ -119,6 +125,7 @@ class AskWorldInitialExecutor(
                     easyKeyValueService.increment(AskWorldUserUsages, userEasyKey)
                 }
             }
+            null
         }
     }
 
@@ -161,6 +168,7 @@ class AskWorldInitialExecutor(
                     context,
                     context.phrase(Phrase.ASK_WORLD_HELP)
                 )
+                null
             }
 
             val isScam =
@@ -176,6 +184,7 @@ class AskWorldInitialExecutor(
                         context.phrase(Phrase.ASK_WORLD_QUESTION_TOO_LONG),
                         replyToUpdate = true
                     )
+                    null
                 }
             }
             return Success(message, isScam) { sender, chatToSend, currentChat ->

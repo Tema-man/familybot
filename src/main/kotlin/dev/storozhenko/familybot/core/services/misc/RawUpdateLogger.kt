@@ -1,9 +1,9 @@
 package dev.storozhenko.familybot.core.services.misc
 
-import dev.storozhenko.familybot.common.extensions.toChat
 import dev.storozhenko.familybot.common.extensions.toJson
-import dev.storozhenko.familybot.common.extensions.toUser
 import dev.storozhenko.familybot.core.repository.RawChatLogRepository
+import dev.storozhenko.familybot.telegram.toChat
+import dev.storozhenko.familybot.telegram.toUser
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.time.Instant

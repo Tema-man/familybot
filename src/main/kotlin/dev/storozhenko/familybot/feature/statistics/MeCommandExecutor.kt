@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.feature.statistics
 import dev.storozhenko.familybot.common.extensions.DateConstants
 import dev.storozhenko.familybot.common.extensions.PluralizedWordsProvider
 import dev.storozhenko.familybot.common.extensions.pluralize
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.repository.CommonRepository
@@ -13,9 +13,10 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.MessageCounter
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.core.model.message.Message
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
@@ -31,7 +32,7 @@ class MeCommandExecutor(
 
     override fun command() = Command.ME
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val chat = context.chat
         val user = context.user
         return {
@@ -46,6 +47,7 @@ class MeCommandExecutor(
                 ).joinToString("\n")
             }
             it.send(context, message, replyToUpdate = true)
+            null
         }
     }
 

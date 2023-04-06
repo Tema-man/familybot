@@ -8,10 +8,12 @@ import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.services.talking.model.Pluralization
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.Pidor
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Instant
@@ -30,7 +32,7 @@ class TopPidorsByMonthsExecutor(
 
     override fun command() = Command.LEADERBOARD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val result = commonRepository
             .getPidorsByChat(context.chat)
             .filter { it.date.isBefore(startOfCurrentMonth()) }
@@ -43,11 +45,13 @@ class TopPidorsByMonthsExecutor(
         if (result.isEmpty()) {
             return {
                 it.send(context, context.phrase(Phrase.LEADERBOARD_NONE))
+                null
             }
         }
         val message = "${context.phrase(Phrase.LEADERBOARD_TITLE)}:\n".bold()
         return {
             it.send(context, message + "\n" + result.joinToString(delimiter), enableHtml = true)
+            null
         }
     }
 
@@ -73,7 +77,7 @@ class TopPidorsByMonthsExecutor(
         val pidor = pidors
             .groupBy { it.user }
             .maxByOrNull { it.value.size }
-            ?: throw FamilyBot.InternalException("List of pidors should be not empty to calculate stats")
+            ?: throw TelegramBot.InternalException("List of pidors should be not empty to calculate stats")
         return PidorStat(pidor.key, pidors.count { it.user == pidor.key })
     }
 

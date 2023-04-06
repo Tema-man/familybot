@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.pidor.services
 
-import dev.storozhenko.familybot.common.extensions.sendContextFree
+import dev.storozhenko.familybot.telegram.sendContextFree
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.AutoPidorTimesLeft
@@ -8,8 +8,8 @@ import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.feature.pidor.PidorExecutor
 import dev.storozhenko.familybot.getLogger
 import kotlinx.coroutines.runBlocking

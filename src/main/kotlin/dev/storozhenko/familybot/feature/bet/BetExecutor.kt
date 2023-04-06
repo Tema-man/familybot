@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.bet
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
@@ -9,7 +9,8 @@ import dev.storozhenko.familybot.core.services.settings.BetTolerance
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -23,7 +24,7 @@ class BetExecutor(
 
     override fun command() = Command.BET
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         if (isBetAlreadyDone(context.userAndChatKey)) {
             return {
                 it.send(
@@ -31,6 +32,7 @@ class BetExecutor(
                     context.phrase(Phrase.BET_ALREADY_WAS),
                     shouldTypeBeforeSend = true
                 )
+                null
             }
         }
         return {
@@ -47,6 +49,7 @@ class BetExecutor(
                         .build()
                 }
             )
+            null
         }
     }
 

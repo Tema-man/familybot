@@ -2,8 +2,8 @@ package dev.storozhenko.familybot.feature.scenario.services
 
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.italic
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.feature.scenario.ScenarioRepository
 import org.springframework.stereotype.Component
 

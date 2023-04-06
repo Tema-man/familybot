@@ -3,9 +3,9 @@ package dev.storozhenko.familybot.feature.ask_world
 import dev.storozhenko.familybot.common.extensions.toAskWorldQuestion
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestion
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldReply
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
+import dev.storozhenko.familybot.telegram.TelegramBot
 import io.micrometer.core.annotation.Timed
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -102,7 +102,7 @@ class AskWorldRepository(private val template: JdbcTemplate) {
             question.chat.id,
             question.user.id,
             Timestamp.from(question.date)
-        ) ?: throw FamilyBot.InternalException("Something has gone wrong, investigate please")
+        ) ?: throw TelegramBot.InternalException("Something has gone wrong, investigate please")
     }
 
     @Timed("repository.AskWorldRepository.getQuestionsFromDate")
@@ -138,14 +138,14 @@ class AskWorldRepository(private val template: JdbcTemplate) {
             reply.chat.id,
             reply.user.id,
             Timestamp.from(reply.date)
-        ) ?: throw FamilyBot.InternalException("Something has gone wrong, investigate please")
+        ) ?: throw TelegramBot.InternalException("Something has gone wrong, investigate please")
     }
 
     @Timed("repository.AskWorldRepository.isReplied")
     fun isReplied(
-      askWorldQuestion: AskWorldQuestion,
-      chat: Chat,
-      user: User
+        askWorldQuestion: AskWorldQuestion,
+        chat: Chat,
+        user: User
     ): Boolean {
         return template.queryForList(
             "SELECT 1 FROM ask_world_replies WHERE question_id = ? AND chat_id = ? AND user_id =?",

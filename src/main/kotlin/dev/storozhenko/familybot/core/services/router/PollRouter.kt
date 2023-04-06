@@ -1,10 +1,10 @@
 package dev.storozhenko.familybot.core.services.router
 
-import dev.storozhenko.familybot.common.extensions.toUser
-import dev.storozhenko.familybot.getLogger
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioGameplayService
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioPollManagingService
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.telegram.toUser
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Update
 import java.time.Instant
@@ -12,8 +12,8 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class PollRouter(
-  private val scenarioPollManagingService: ScenarioPollManagingService,
-  private val scenarioGameplayService: ScenarioGameplayService
+    private val scenarioPollManagingService: ScenarioPollManagingService,
+    private val scenarioGameplayService: ScenarioGameplayService
 ) {
     private val log = getLogger()
 
@@ -30,7 +30,7 @@ class PollRouter(
         val user = answer.user.toUser(chat = chat)
         if (answer.optionIds.isNotEmpty()) {
             val scenarioWay = scenarioMove.ways.find { it.answerNumber == answer.optionIds.first() }
-                ?: throw FamilyBot.InternalException("Can't find proper answer")
+                ?: throw TelegramBot.InternalException("Can't find proper answer")
             scenarioGameplayService.addChoice(chat, user, scenarioMove, scenarioWay)
         } else {
             scenarioGameplayService.removeChoice(chat, user, scenarioMove)

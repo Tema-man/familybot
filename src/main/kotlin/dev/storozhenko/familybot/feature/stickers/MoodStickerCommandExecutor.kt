@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.stickers
 
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.stickers.StickerPack
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.telegram.stickers.StickerPack
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import org.springframework.stereotype.Component
 

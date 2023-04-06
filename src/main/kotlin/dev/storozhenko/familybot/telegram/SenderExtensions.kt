@@ -1,10 +1,11 @@
-package dev.storozhenko.familybot.common.extensions
+package dev.storozhenko.familybot.telegram
 
+import dev.storozhenko.familybot.common.extensions.randomInt
+import dev.storozhenko.familybot.common.extensions.toJson
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
-import dev.storozhenko.familybot.core.telegram.stickers.Sticker
-import dev.storozhenko.familybot.core.telegram.stickers.StickerPack
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.stickers.Sticker
+import dev.storozhenko.familybot.telegram.stickers.StickerPack
 import dev.storozhenko.familybot.getLogger
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -215,6 +216,6 @@ fun ChatMember.user(): User {
         ChatMemberMember.STATUS -> (this as ChatMemberMember).user
         ChatMemberOwner.STATUS -> (this as ChatMemberOwner).user
         ChatMemberRestricted.STATUS -> (this as ChatMemberRestricted).user
-        else -> throw FamilyBot.InternalException("Can't find mapping for user $this ")
+        else -> throw TelegramBot.InternalException("Can't find mapping for user $this ")
     }
 }

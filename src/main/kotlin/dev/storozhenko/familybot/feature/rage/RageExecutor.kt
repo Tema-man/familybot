@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.rage
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.common.extensions.untilNextDay
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
@@ -11,11 +11,11 @@ import dev.storozhenko.familybot.core.services.settings.FirstTimeInChat
 import dev.storozhenko.familybot.core.services.settings.RageMode
 import dev.storozhenko.familybot.core.services.settings.RageTolerance
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.message.Message
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
-import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 @Component
@@ -33,13 +33,14 @@ class RageExecutor(
 
     override fun command() = Command.RAGE
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val key = context.chatKey
         if (isRageForced(context)) {
             log.warn("Someone forced ${command()}")
             easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, 10.minutes)
             return {
                 it.send(context, context.phrase(Phrase.RAGE_INITIAL), shouldTypeBeforeSend = true)
+                null
             }
         }
 
@@ -51,6 +52,7 @@ class RageExecutor(
                     context.phrase(Phrase.TECHNICAL_ISSUE),
                     shouldTypeBeforeSend = true
                 )
+                null
             }
         }
 
@@ -62,12 +64,14 @@ class RageExecutor(
                     context.phrase(Phrase.RAGE_DONT_CARE_ABOUT_YOU),
                     shouldTypeBeforeSend = true
                 )
+                null
             }
         }
         easyKeyValueService.put(RageMode, key, AMOUNT_OF_RAGE_MESSAGES, 10.minutes)
         easyKeyValueService.put(RageTolerance, key, true, untilNextDay())
         return {
             it.send(context, context.phrase(Phrase.RAGE_INITIAL), shouldTypeBeforeSend = true)
+            null
         }
     }
 

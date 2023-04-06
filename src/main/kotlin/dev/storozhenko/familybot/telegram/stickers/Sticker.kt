@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.core.telegram.stickers
+package dev.storozhenko.familybot.telegram.stickers
 
 enum class Sticker(val pack: StickerPack, val stickerEmoji: String) {
     LEFT_ZIGA(StickerPack.FAMILY_PACK, "\uD83D\uDD90"),

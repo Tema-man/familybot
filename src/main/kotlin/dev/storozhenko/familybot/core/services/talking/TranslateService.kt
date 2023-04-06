@@ -2,8 +2,8 @@ package dev.storozhenko.familybot.core.services.talking
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -42,7 +42,7 @@ class TranslateService(private val botConfig: BotConfig) {
         )
         val response = restTemplate
             .exchange(yandexUrl, HttpMethod.POST, entity, YandexTranslateResponse::class.java)
-            .body ?: throw FamilyBot.InternalException("Can't deserialize response from Yandex")
+            .body ?: throw TelegramBot.InternalException("Can't deserialize response from Yandex")
 
         return response.translations.first().text
     }

@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.common.extensions
 
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.User
 
 class PluralizedWordsProvider(
     val one: () -> String = { "раз" },

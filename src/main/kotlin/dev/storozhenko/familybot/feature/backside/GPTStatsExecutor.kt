@@ -2,14 +2,15 @@ package dev.storozhenko.familybot.feature.backside
 
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.code
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.ChatGPTTokenUsageByChat
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.core.telegram.BotConfig
-import dev.storozhenko.familybot.core.telegram.model.Chat
+import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -21,7 +22,7 @@ class GPTStatsExecutor(
 ) : OnlyBotOwnerExecutor(botConfig) {
     override fun getMessagePrefix() = "gpt"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val chats = commonRepository.getChatsAll().associateBy { it.id }
         val stats = easyKeyValueService.getAllByPartKey(ChatGPTTokenUsageByChat)
         val message = stats
@@ -35,6 +36,7 @@ class GPTStatsExecutor(
         return {
             it.send(context, message, enableHtml = true)
             it.send(context, "Всего потрачено: $total", enableHtml = true)
+            null
         }
     }
 }

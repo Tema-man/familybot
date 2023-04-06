@@ -7,8 +7,10 @@ import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.Pidor
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.Pidor
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -21,7 +23,7 @@ class PidorStatsWorldExecutor(
 
     override fun command() = Command.STATS_WORLD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val pidorsByChat = repository.getAllPidors(
             startDate = DateConstants.theBirthDayOfFamilyBot
         )
@@ -36,6 +38,6 @@ class PidorStatsWorldExecutor(
             .take(100)
 
         val title = "${context.phrase(Phrase.PIDOR_STAT_WORLD)}:\n".bold()
-        return { it.send(context, title + pidorsByChat.joinToString("\n"), enableHtml = true) }
+        return { it.send(context, title + pidorsByChat.joinToString("\n"), enableHtml = true); null }
     }
 }

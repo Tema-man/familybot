@@ -2,13 +2,14 @@ package dev.storozhenko.familybot.feature.statistics
 
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.formatTopList
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
-import dev.storozhenko.familybot.core.telegram.model.Command
-import dev.storozhenko.familybot.core.telegram.model.CommandByUser
+import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.CommandByUser
+import dev.storozhenko.familybot.core.model.message.Message
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -19,7 +20,7 @@ class CommandStatExecutor(
 
     override fun command() = Command.COMMAND_STATS
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
         val all = repositoryCommand.getAll(context.chat).groupBy(CommandByUser::command)
 
         val topList = all
@@ -33,6 +34,7 @@ class CommandStatExecutor(
                 "${context.phrase(Phrase.STATS_BY_COMMAND)}:\n".bold() + topList,
                 enableHtml = true
             )
+            null
         }
     }
 

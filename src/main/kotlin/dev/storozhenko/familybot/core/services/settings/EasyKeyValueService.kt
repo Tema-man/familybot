@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.core.services.settings
 
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import kotlin.time.toJavaDuration
@@ -82,7 +82,7 @@ class EasyKeyValueService(
             Boolean::class -> rawValue.toBoolean()
             Long::class -> rawValue.toLong()
             String::class -> rawValue
-            else -> throw FamilyBot.InternalException("Parsing for type ${easyKeyType.getType()} is not implemented")
+            else -> throw TelegramBot.InternalException("Parsing for type ${easyKeyType.getType()} is not implemented")
         }
         return result as T
     }

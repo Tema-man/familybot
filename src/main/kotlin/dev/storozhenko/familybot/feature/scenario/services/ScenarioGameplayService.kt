@@ -1,10 +1,10 @@
 package dev.storozhenko.familybot.feature.scenario.services
 
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.core.telegram.model.Chat
-import dev.storozhenko.familybot.core.telegram.model.User
+import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.feature.scenario.ScenarioRepository
-import dev.storozhenko.familybot.core.telegram.FamilyBot
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.springframework.stereotype.Component
 
 @Component
@@ -50,7 +50,7 @@ class ScenarioGameplayService(
     private fun nextMove(chat: Chat, scenarioWay: ScenarioWay): ScenarioMove {
         log.info("Going for next move for chat $chat, way is $scenarioWay")
         val move = scenarioRepository.findMove(scenarioWay.nextMoveId)
-            ?: throw FamilyBot.InternalException("Can't find a next move of the way")
+            ?: throw TelegramBot.InternalException("Can't find a next move of the way")
         log.info("Next move is $move for chat $chat")
         scenarioRepository.addState(move, chat)
         return move
@@ -58,7 +58,7 @@ class ScenarioGameplayService(
 
     private fun getCurrentMoveResults(chat: Chat): ScenarioMoveVoteResult {
         val scenarioState = scenarioRepository.getState(chat)
-            ?: throw FamilyBot.InternalException("Can't get state for the chat")
+            ?: throw TelegramBot.InternalException("Can't get state for the chat")
         val scenarioMove = scenarioState.move
         return if (scenarioMove.isEnd || scenarioMove.ways.isEmpty()) {
             log.info("Scenario $scenarioMove is ended of has no ways")

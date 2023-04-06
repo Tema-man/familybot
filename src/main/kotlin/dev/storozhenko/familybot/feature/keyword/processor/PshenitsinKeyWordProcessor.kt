@@ -1,12 +1,12 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.common.extensions.send
+import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.PshenitsinTolerance
 import dev.storozhenko.familybot.core.services.talking.TalkingService
-import dev.storozhenko.familybot.core.services.talking.TalkingServiceOld
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -24,7 +24,7 @@ class PshenitsinKeyWordProcessor(
         return containsSymbolsY(text) && isTolerant(context.message.chatId).not()
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Unit {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
         return { sender ->
             val text = talkingService
                 .getReplyToUser(context)
@@ -47,6 +47,7 @@ class PshenitsinKeyWordProcessor(
             )
 
             keyValueService.put(PshenitsinTolerance, context.chatKey, true, 1.minutes)
+            null
         }
     }
 

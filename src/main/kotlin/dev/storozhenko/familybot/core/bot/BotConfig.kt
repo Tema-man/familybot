@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.core.telegram
+package dev.storozhenko.familybot.core.bot
 
 data class BotConfig(
     val botToken: String,
