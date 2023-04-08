@@ -4,14 +4,13 @@ import dev.storozhenko.familybot.common.extensions.dropLastDelimiter
 import dev.storozhenko.familybot.common.extensions.randomBoolean
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
-import dev.storozhenko.familybot.core.model.message.Message
-import dev.storozhenko.familybot.core.model.message.SimpleTextMessage
+import dev.storozhenko.familybot.core.model.action.Action
+import dev.storozhenko.familybot.core.model.action.SendTextAction
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.TalkingDensity
-import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.util.regex.Pattern
@@ -27,11 +26,11 @@ class HuificatorExecutor(
 
     override fun canExecute(context: ExecutorContext): Boolean = shouldHuificate(context)
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val huifyed = huify(context.message.text.orEmpty()) ?: return { null }
         return { it ->
 //            it.send(context, huifyed, shouldTypeBeforeSend = true)
-            SimpleTextMessage(huifyed, context)
+            SendTextAction(huifyed, context)
         }
     }
 

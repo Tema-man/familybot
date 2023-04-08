@@ -7,7 +7,7 @@ import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.telegram.TelegramBot
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -26,7 +26,7 @@ class TopHistoryExecutor : CommandExecutor() {
 
     override fun command(): Command = Command.TOP_HISTORY
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? = { sender ->
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? = { sender ->
         sender.send(context, mamoeb.curses.random())
         null
     }

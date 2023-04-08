@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.italic
 import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.common.extensions.toHourMinuteString
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.telegram.TelegramBot
@@ -53,11 +53,11 @@ class ScenarioSessionManagementService(
         }
     }
 
-    fun processCurrentGame(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    fun processCurrentGame(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return currentGame(context)
     }
 
-    fun listGames(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    fun listGames(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return {
             it.send(
                 context,
@@ -73,7 +73,7 @@ class ScenarioSessionManagementService(
         }
     }
 
-    private fun currentGame(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    private fun currentGame(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val chat = context.chat
         val previousMove = scenarioGameplayService.getCurrentScenarioState(chat)?.move
             ?: throw TelegramBot.InternalException("Internal logic error, current state wasn't found")
@@ -264,7 +264,7 @@ class ScenarioSessionManagementService(
     private fun sendFinal(
         previousMove: ScenarioMove,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? =
+    ): suspend (AbsSender) -> Action? =
         { sender ->
             val evenMorePreviousMove = scenarioService.getPreviousMove(previousMove)
                 ?: throw TelegramBot.InternalException("Scenario seems broken")

@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.feature.vestnik
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.UkrainianLanguage
@@ -28,7 +28,7 @@ class VestnikCommandExecutor(
 
     override fun command() = Command.VESTNIK
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return { sender ->
             val question = coroutineScope {
                 async {

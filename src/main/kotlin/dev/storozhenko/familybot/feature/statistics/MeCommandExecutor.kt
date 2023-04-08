@@ -16,7 +16,7 @@ import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.User
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
@@ -32,7 +32,7 @@ class MeCommandExecutor(
 
     override fun command() = Command.ME
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val chat = context.chat
         val user = context.user
         return {

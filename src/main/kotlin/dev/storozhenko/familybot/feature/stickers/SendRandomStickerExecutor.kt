@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.common.extensions.startOfDay
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.CommandByUser
 import dev.storozhenko.familybot.core.model.User
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.telegram.send
@@ -18,7 +18,7 @@ abstract class SendRandomStickerExecutor(
     private val historyRepository: CommandHistoryRepository
 ) : CommandExecutor() {
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         if (isInvokedToday(context.update.toUser())) {
             return { null }
         }

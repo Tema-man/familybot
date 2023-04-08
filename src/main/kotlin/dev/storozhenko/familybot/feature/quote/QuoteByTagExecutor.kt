@@ -5,7 +5,7 @@ import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
@@ -18,7 +18,7 @@ class QuoteByTagExecutor(private val quoteRepository: QuoteRepository) : Command
 
     override fun command() = Command.QUOTE_BY_TAG
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return {
             val rows = quoteRepository
                 .getTags()

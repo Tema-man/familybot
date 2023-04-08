@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.common.extensions.randomBoolean
 import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
@@ -31,7 +31,7 @@ class TalkingExecutor(
     override fun priority(context: ExecutorContext) =
         if (isRageModeEnabled(context)) Priority.HIGHEST else Priority.LOWEST
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val rageModEnabled = isRageModeEnabled(context)
         if (shouldReply(rageModEnabled, context)) {
             return {

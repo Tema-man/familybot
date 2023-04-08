@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.feature.security
 import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
@@ -23,7 +23,7 @@ class AntiDdosExecutor(
 
     override fun priority(context: ExecutorContext) = Priority.HIGHEST
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val update = context.update
         val message = context.phrase(Phrase.STOP_DDOS)
         return when {
@@ -41,12 +41,12 @@ class AntiDdosExecutor(
     private fun messageCase(
         context: ExecutorContext,
         message: String
-    ): suspend (AbsSender) -> Message? = { it.send(context, message); null }
+    ): suspend (AbsSender) -> Action? = { it.send(context, message); null }
 
     private fun callbackQueryCase(
         context: ExecutorContext,
         message: String
-    ): suspend (AbsSender) -> Message? = { it ->
+    ): suspend (AbsSender) -> Action? = { it ->
         it.execute(
             AnswerCallbackQuery(context.update.callbackQuery.id)
                 .apply {

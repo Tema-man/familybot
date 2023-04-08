@@ -12,7 +12,7 @@ import dev.storozhenko.familybot.core.services.settings.RageMode
 import dev.storozhenko.familybot.core.services.settings.RageTolerance
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -33,7 +33,7 @@ class RageExecutor(
 
     override fun command() = Command.RAGE
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val key = context.chatKey
         if (isRageForced(context)) {
             log.warn("Someone forced ${command()}")

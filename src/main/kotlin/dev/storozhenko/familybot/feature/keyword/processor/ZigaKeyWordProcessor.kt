@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.telegram.sendSticker
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.telegram.stickers.Sticker
@@ -19,7 +19,7 @@ class ZigaKeyWordProcessor : KeyWordProcessor {
         return isRightPack && zigaStickers.any { it.stickerEmoji == incomeSticker.emoji }
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return {
             val stickerToSend =
                 if (context.message.sticker?.emoji == Sticker.LEFT_ZIGA.stickerEmoji) {

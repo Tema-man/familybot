@@ -1,15 +1,15 @@
 package dev.storozhenko.familybot.telegram.mappers
 
-import dev.storozhenko.familybot.core.model.message.Message
-import dev.storozhenko.familybot.core.model.message.SimpleTextMessage
+import dev.storozhenko.familybot.core.model.action.Action
+import dev.storozhenko.familybot.core.model.action.SendTextAction
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class TextMessageHandler : MessageHandler() {
 
-    override suspend fun handle(message: Message, sender: AbsSender): Boolean {
-        if (message !is SimpleTextMessage) return false
+    override suspend fun handle(message: Action, sender: AbsSender): Boolean {
+        if (message !is SendTextAction) return false
 
         sendInternal(
             chatId = message.context.chat.idString,

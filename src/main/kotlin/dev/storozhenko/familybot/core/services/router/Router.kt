@@ -11,7 +11,7 @@ import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.Executor
 import dev.storozhenko.familybot.core.executor.PrivateMessageExecutor
 import dev.storozhenko.familybot.core.model.CommandByUser
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.repository.ChatLogRepository
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.repository.CommonRepository
@@ -59,7 +59,7 @@ class Router(
         logger.error("Exception in logging job", exception)
     }
 
-    suspend fun processUpdate(update: Update): suspend (AbsSender) -> Message? {
+    suspend fun processUpdate(update: Update): suspend (AbsSender) -> Action? {
         val message = update.message
             ?: update.editedMessage
             ?: update.callbackQuery.message
@@ -138,7 +138,7 @@ class Router(
         logChatMessage(context)
     }
 
-    private fun antiDdosSkip(context: ExecutorContext): suspend (AbsSender) -> Message? =
+    private fun antiDdosSkip(context: ExecutorContext): suspend (AbsSender) -> Action? =
         marker@{ it ->
             val executor = executors
                 .filterIsInstance<CommandExecutor>()
@@ -153,7 +153,7 @@ class Router(
             null
         }
 
-    private fun disabledCommand(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    private fun disabledCommand(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val phrase = context.phrase(Phrase.COMMAND_IS_OFF)
         return { it -> it.send(context, phrase); null }
     }

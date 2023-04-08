@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.common
 
 import dev.storozhenko.familybot.core.executor.Executor
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.telegram.TelegramBot
@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 fun Executor.meteredExecute(
     context: ExecutorContext,
     meterRegistry: MeterRegistry
-): suspend (AbsSender) -> Message? {
+): suspend (AbsSender) -> Action? {
     return meterRegistry
         .timer("executors.${this::class.simpleName}.execute")
         .recordCallable {

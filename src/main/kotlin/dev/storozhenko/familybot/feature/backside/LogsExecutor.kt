@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.feature.backside
 import dev.storozhenko.familybot.common.ErrorLogsDeferredAppender
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.telegram.getMessageTokens
 import dev.storozhenko.familybot.telegram.send
@@ -17,7 +17,7 @@ class LogsExecutor(botConfig: BotConfig) : OnlyBotOwnerExecutor(botConfig) {
 
     override fun getMessagePrefix() = "logs"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val tokens = context.update.getMessageTokens()
         if (tokens.getOrNull(1) == "clear") {
             ErrorLogsDeferredAppender.errors.clear()

@@ -8,7 +8,7 @@ import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.marriage.model.Marriage
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -63,7 +63,7 @@ class MarryListExecutor(
 
     override fun command() = Command.MARRY_LIST
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val marriages = marriagesRepository.getAllMarriages(context.chat.id)
         if (marriages.isEmpty()) {
             return { sender -> sender.send(context, context.phrase(Phrase.MARRY_EMPTY_LIST)); null }

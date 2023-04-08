@@ -6,7 +6,7 @@ import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.FuckOffOverride
 import dev.storozhenko.familybot.core.services.settings.FuckOffTolerance
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.keyword.KeyWordProcessor
 import dev.storozhenko.familybot.telegram.sendDeferred
 import dev.storozhenko.familybot.core.services.talking.TalkingService
@@ -41,7 +41,7 @@ class BotMentionKeyWordProcessor(
         return !message.isCommand && (isReplyToBot(message) || isBotMention(message) || isBotNameMention(message))
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Action? {
         if (isFuckOff(context)) {
             return fuckOff(context)
         }
@@ -84,7 +84,7 @@ class BotMentionKeyWordProcessor(
         }
     }
 
-    fun fuckOff(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    fun fuckOff(context: ExecutorContext): suspend (AbsSender) -> Action? {
         easyKeyValueService.put(FuckOffOverride, context.chatKey, true, defaultFuckOffDuration)
         easyKeyValueService.put(FuckOffTolerance, context.userAndChatKey, true, defaultToleranceDuration)
         return {null}

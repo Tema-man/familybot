@@ -49,7 +49,7 @@ class AskWorldInitialExecutor(
 
     override fun command() = Command.ASK_WORLD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> dev.storozhenko.familybot.core.model.message.Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> dev.storozhenko.familybot.core.model.action.Action? {
         val currentChat = context.chat
 
         val chatKey = context.chatKey

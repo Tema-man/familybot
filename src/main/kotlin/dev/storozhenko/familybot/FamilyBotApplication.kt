@@ -28,10 +28,10 @@ class FamilyBotApplication(
 ) {
     private val logger = getLogger()
 
-    @Bean
+    @[Bean Suppress("unused")]
     fun injectTimedAspect(registry: MeterRegistry): TimedAspect = TimedAspect(registry)
 
-    @Bean
+    @[Bean Suppress("unused")]
     fun injectBotConfig(appConfig: AppConfig, telegramConfig: TelegramConfig): BotConfig {
         val botNameAliases = if (appConfig.botNameAliases.isNullOrEmpty()) {
             logger.warn("No bot aliases provided, using botName")

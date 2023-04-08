@@ -7,7 +7,7 @@ import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.getLogger
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -21,7 +21,7 @@ class AnswerExecutor : CommandExecutor() {
 
     override fun command() = Command.ANSWER
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val text = context.message.text
 
         val message = text

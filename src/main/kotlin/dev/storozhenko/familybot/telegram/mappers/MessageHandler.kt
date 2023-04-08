@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.telegram.mappers
 
 import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.common.extensions.toJson
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.telegram.SenderLogger
 import kotlinx.coroutines.delay
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 abstract class MessageHandler {
-    abstract suspend fun handle(message: Message, sender: AbsSender): Boolean
+    abstract suspend fun handle(message: Action, sender: AbsSender): Boolean
 
     protected suspend fun sendInternal(
         chatId: String,

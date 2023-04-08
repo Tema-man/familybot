@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.feature.ask_world.model
 
 import dev.storozhenko.familybot.core.model.Chat
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -14,5 +14,5 @@ class Success(
 ) : AskWorldQuestionData
 
 class ValidationError(
-    val invalidQuestionAction: suspend (AbsSender) -> Message?
+    val invalidQuestionAction: suspend (AbsSender) -> Action?
 ) : AskWorldQuestionData

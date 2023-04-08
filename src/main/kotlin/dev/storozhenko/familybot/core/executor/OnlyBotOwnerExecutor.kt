@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.telegram.TrackingAbsSender
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.getLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +29,9 @@ abstract class OnlyBotOwnerExecutor(private val botConfig: BotConfig) : PrivateM
 
     abstract fun getMessagePrefix(): String
 
-    abstract fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message?
+    abstract fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Action?
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return { sender ->
             val trackingAbsSender = TrackingAbsSender(sender)
             val message = executeInternal(context).invoke(trackingAbsSender)

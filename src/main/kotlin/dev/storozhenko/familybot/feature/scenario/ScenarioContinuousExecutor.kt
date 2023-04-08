@@ -7,7 +7,7 @@ import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.telegram.TelegramBot
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioService
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioSessionManagementService
 import org.springframework.stereotype.Component
@@ -26,7 +26,7 @@ class ScenarioContinuousExecutor(
 
     override fun command() = Command.SCENARIO
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return {
             val callbackQuery = context.update.callbackQuery
 

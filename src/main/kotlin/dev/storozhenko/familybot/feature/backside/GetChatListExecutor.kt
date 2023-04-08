@@ -6,7 +6,7 @@ import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.model.Chat
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -19,7 +19,7 @@ class GetChatListExecutor(
 
     override fun getMessagePrefix() = "chats"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val chats = commonRepository.getChats()
         return { sender ->
             sender.send(context, "Active chats count=${chats.size}")

@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.telegram.sendSticker
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.telegram.stickers.Sticker
@@ -16,7 +16,7 @@ class SleepKeyWordProcessor : KeyWordProcessor {
                 text.contains("сплю", ignoreCase = true)
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return { it.sendSticker(context, Sticker.SWEET_DREAMS, replyToUpdate = true); null }
     }
 

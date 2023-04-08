@@ -14,7 +14,7 @@ import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.Pidor
 import dev.storozhenko.familybot.core.model.User
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.pidor.services.PidorCompetitionService
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -48,7 +48,7 @@ class BetContinuousExecutor(
                 (message.replyToMessage.text ?: "") in getDialogMessages(context)
     }
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val user = context.user
         val chatId = context.message.chatId
         val key = context.userAndChatKey

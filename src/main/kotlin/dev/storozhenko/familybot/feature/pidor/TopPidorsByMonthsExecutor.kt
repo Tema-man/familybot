@@ -12,7 +12,7 @@ import dev.storozhenko.familybot.telegram.TelegramBot
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.Pidor
 import dev.storozhenko.familybot.core.model.User
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -32,7 +32,7 @@ class TopPidorsByMonthsExecutor(
 
     override fun command() = Command.LEADERBOARD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val result = commonRepository
             .getPidorsByChat(context.chat)
             .filter { it.date.isBefore(startOfCurrentMonth()) }

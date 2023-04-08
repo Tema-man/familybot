@@ -8,7 +8,7 @@ import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -22,7 +22,7 @@ class UserEnterExitExecutor(
 
     override fun priority(context: ExecutorContext) = Priority.LOW
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val message = context.message
         val phrase = when {
             isUserLeft(message) -> Phrase.USER_LEAVING_CHAT

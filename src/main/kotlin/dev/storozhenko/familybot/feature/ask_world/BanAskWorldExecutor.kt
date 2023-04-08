@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.ask_world
 
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.feature.ask_world.model.AskWorldQuestion
 import dev.storozhenko.familybot.feature.ban.service.BanService
@@ -22,7 +22,7 @@ class BanAskWorldExecutor(
 
     override fun command() = Command.BAN
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val message = context.message
         if (message.isReply.not()) return { null }
 
@@ -52,7 +52,7 @@ class BanAskWorldExecutor(
     private fun ban(
         context: ExecutorContext,
         question: AskWorldQuestion
-    ): suspend (AbsSender) -> Message? {
+    ): suspend (AbsSender) -> Action? {
         val tokens = context.update.message.text.split(" ")
         val banReason = tokens[1]
         val isChat = tokens.getOrNull(2) == "chat"

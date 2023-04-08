@@ -3,7 +3,7 @@ package dev.storozhenko.familybot.feature.settings
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
@@ -20,7 +20,7 @@ class SettingsExecutor(
 
     override fun command() = Command.SETTINGS
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return {
             it.send(
                 context,

@@ -9,7 +9,7 @@ import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.User
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.pidor.services.PidorStrikeStorage
 import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
@@ -25,7 +25,7 @@ class PidorStatsStrikesExecutor(
 
     override fun command() = Command.STATS_STRIKES
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val chat = context.chat
         val strikes =
             pidorStrikeStorage.get(chat.key()).stats.filter { (_, stats) -> stats.maxStrike > 1 }

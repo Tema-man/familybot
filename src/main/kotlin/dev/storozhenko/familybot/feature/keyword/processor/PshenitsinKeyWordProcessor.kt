@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.feature.keyword.processor
 
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
@@ -24,7 +24,7 @@ class PshenitsinKeyWordProcessor(
         return containsSymbolsY(text) && isTolerant(context.message.chatId).not()
     }
 
-    override fun process(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun process(context: ExecutorContext): suspend (AbsSender) -> Action? {
         return { sender ->
             val text = talkingService
                 .getReplyToUser(context)

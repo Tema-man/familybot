@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.settings
 
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.feature.settings.processors.SettingProcessor
@@ -22,7 +22,7 @@ class AdvancedSettingsExecutor(
 
     private val log = getLogger()
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val messageTokens = context.update.getMessageTokens()
         if (messageTokens.size == 1) {
             return {

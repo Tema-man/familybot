@@ -2,7 +2,7 @@ package dev.storozhenko.familybot.feature.ban
 
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.OnlyBotOwnerExecutor
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.feature.ban.service.BanService
@@ -20,7 +20,7 @@ class BanSomeoneExecutor(
 
     private val banPrefix = "ban|"
 
-    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun executeInternal(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val command = context.update.getMessageTokens(delimiter = "|")
         val identification = command[1]
         val isUnban = command.getOrNull(3) == "unban"

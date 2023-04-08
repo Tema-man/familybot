@@ -9,7 +9,7 @@ import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.CommandByUser
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -20,7 +20,7 @@ class CommandStatExecutor(
 
     override fun command() = Command.COMMAND_STATS
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val all = repositoryCommand.getAll(context.chat).groupBy(CommandByUser::command)
 
         val topList = all

@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.common.extensions.key
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.ProposalTo
@@ -31,7 +31,7 @@ class MarriageExecutor(
 
     override fun command() = Command.MARRY
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
         if (!context.message.isReply) {
             return { sender -> sender.send(context, context.phrase(Phrase.MARRY_RULES)); null }
         }
@@ -116,7 +116,7 @@ class MarriageExecutor(
         proposalSource: TelegramMessage,
         proposalTarget: TelegramMessage,
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? {
+    ): suspend (AbsSender) -> Action? {
         keyValueService.put(
             ProposalTo,
             key = proposalTarget.key(),
@@ -133,7 +133,7 @@ class MarriageExecutor(
         }
     }
 
-    private fun marry(context: ExecutorContext): suspend (AbsSender) -> Message? {
+    private fun marry(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val update = context.update
         val proposalTarget = context.message.replyToMessage.from.toUser(chat = context.chat)
         val proposalSource = context.user

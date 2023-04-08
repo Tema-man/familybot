@@ -4,7 +4,7 @@ import dev.storozhenko.familybot.telegram.send
 import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.model.Command
-import dev.storozhenko.familybot.core.model.message.Message
+import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioGameplayService
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioService
 import dev.storozhenko.familybot.feature.scenario.services.ScenarioSessionManagementService
@@ -21,7 +21,7 @@ class ScenarioExecutor(
 
     override fun command() = Command.SCENARIO
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Message? = when {
+    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? = when {
         context.message.text.contains(STORY_PREFIX) -> tellTheStory(context)
         context.isFromDeveloper && context.message.text.contains(MOVE_PREFIX) -> moveState(context)
         else -> processGame(context)
@@ -29,7 +29,7 @@ class ScenarioExecutor(
 
     private fun processGame(
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? {
+    ): suspend (AbsSender) -> Action? {
         val chat = context.chat
         val currentGame = scenarioService.getCurrentGame(chat)
         return when {
@@ -41,7 +41,7 @@ class ScenarioExecutor(
 
     private fun handleEndOfStory(
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? = {
+    ): suspend (AbsSender) -> Action? = {
         scenarioSessionManagementService.processCurrentGame(context).invoke(it)
         delay(2000L)
         scenarioSessionManagementService.listGames(context).invoke(it)
@@ -49,14 +49,14 @@ class ScenarioExecutor(
 
     private fun tellTheStory(
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? {
+    ): suspend (AbsSender) -> Action? {
         val story = scenarioService.getAllStoryOfCurrentGame(context.chat)
         return { it.send(context, story, enableHtml = true); null }
     }
 
     private fun moveState(
         context: ExecutorContext
-    ): suspend (AbsSender) -> Message? {
+    ): suspend (AbsSender) -> Action? {
         val nextMove = scenarioGameplayService.nextState(context.chat)
         return {
             if (nextMove == null) {
