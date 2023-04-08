@@ -57,13 +57,12 @@ class TelegramBot(
     }
 
     override fun start(context: ConfigurableApplicationContext) {
-        val telegramBotsApi = TelegramBotsApi(DefaultBotSession::class.java)
+        TelegramBotsApi(DefaultBotSession::class.java).also { it.registerBot(this) }
 
         val commands = context.getBeansOfType(CommandExecutor::class.java).values.asSequence()
             .map { it.command() }.sorted().distinct()
             .map { BotCommand(it.command, it.description) }.toList()
 
-        telegramBotsApi.registerBot(this)
         listOf(
             BotCommandScopeAllGroupChats() to commands,
             BotCommandScopeAllPrivateChats() to commands
@@ -111,13 +110,18 @@ class TelegramBot(
             }
 
         } catch (e: TelegramApiRequestException) {
-            val logMessage = "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
+            val logMessage =
+                "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
             if (e.errorCode in 400..499) {
                 log.warn(logMessage, e)
                 if (e.apiResponse.contains("CHAT_WRITE_FORBIDDEN")) {
                     listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack)
                         .forEach { function ->
-                            easyKeyValueService.put(function, ChatEasyKey(update.toChat().id), false)
+                            easyKeyValueService.put(
+                                function,
+                                ChatEasyKey(update.toChat().id),
+                                false
+                            )
                         }
                 }
             } else {

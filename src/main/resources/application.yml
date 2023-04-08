@@ -1,13 +1,16 @@
-settings:
-  bot-name: ${BOT_NAME:}
-  bot-token: ${BOT_TOKEN:}
-  bot-name-aliases: ${BOT_NAME_ALIASES:}
-  developer: ${BOT_OWNER_NAME:}
-  developer-id: ${BOT_OWNER_TELEGRAM_ID:}
+application:
   yandex-key: ${YANDEX_API_TOKEN:}
-  payment-token: ${PAYMENT_TOKEN:}
   ytdlLocation: ${YTDL_LOCATION:}
   openAiToken: ${OPEN_AI_TOKEN:}
+  bot-name-aliases: ${BOT_NAME_ALIASES:}
+
+telegram:
+  bot-name: ${BOT_NAME:}
+  bot-token: ${BOT_TOKEN:}
+  developer: ${BOT_OWNER_NAME:}
+  developer-id: ${BOT_OWNER_TELEGRAM_ID:}
+  payment-token: ${PAYMENT_TOKEN:}
+
 spring:
   datasource:
     url: ${JDBC_URL:jdbc:postgresql://localhost:5432/family}

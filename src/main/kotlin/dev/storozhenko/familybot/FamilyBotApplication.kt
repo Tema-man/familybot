@@ -19,7 +19,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableScheduling
-@EnableConfigurationProperties(BotConfigInjector::class)
+@EnableConfigurationProperties(
+    AppConfig::class,
+    TelegramConfig::class
+)
 class FamilyBotApplication(
     private val env: ConfigurableEnvironment
 ) {
@@ -29,34 +32,35 @@ class FamilyBotApplication(
     fun injectTimedAspect(registry: MeterRegistry): TimedAspect = TimedAspect(registry)
 
     @Bean
-    fun injectBotConfig(botConfigInjector: BotConfigInjector): BotConfig {
-        val botNameAliases = if (botConfigInjector.botNameAliases.isNullOrEmpty()) {
+    fun injectBotConfig(appConfig: AppConfig, telegramConfig: TelegramConfig): BotConfig {
+        val botNameAliases = if (appConfig.botNameAliases.isNullOrEmpty()) {
             logger.warn("No bot aliases provided, using botName")
-            listOf(botConfigInjector.botName)
+            listOf(telegramConfig.botName)
         } else {
-            botConfigInjector.botNameAliases.split(",")
+            appConfig.botNameAliases.split(",")
         }
 
         return BotConfig(
-            botToken = requireValue(botConfigInjector.botToken, "botToken"),
-            botName = requireValue(botConfigInjector.botName, "botName"),
-            developer = requireValue(botConfigInjector.developer, "developer"),
-            developerId = requireValue(botConfigInjector.developerId, "developerId"),
-            botNameAliases = botNameAliases,
-            yandexKey = optionalValue(
-                botConfigInjector::yandexKey,
-                "Yandex API key is not found, language API won't work"
-            ),
+            botToken = requireValue(telegramConfig.botToken, "botToken"),
+            botName = requireValue(telegramConfig.botName, "botName"),
+            developer = requireValue(telegramConfig.developer, "developer"),
+            developerId = requireValue(telegramConfig.developerId, "developerId"),
             paymentToken = optionalValue(
-                botConfigInjector::paymentToken,
+                telegramConfig::paymentToken,
                 "Payment token is not found, payment API won't work"
             ),
+
+            botNameAliases = botNameAliases,
+            yandexKey = optionalValue(
+                appConfig::yandexKey,
+                "Yandex API key is not found, language API won't work"
+            ),
             ytdlLocation = optionalValue(
-                botConfigInjector::ytdlLocation,
+                appConfig::ytdlLocation,
                 "yt-dlp is missing, downloading function won't work"
             ),
             openAiToken = optionalValue(
-                botConfigInjector::openAiToken,
+                appConfig::openAiToken,
                 "OpenAI token is missing, API won't work"
             ),
             testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME)
@@ -72,15 +76,19 @@ class FamilyBotApplication(
             .also { if (it == null) logger.warn(log) }
 }
 
-@ConfigurationProperties("settings", ignoreInvalidFields = false)
-data class BotConfigInjector @ConstructorBinding constructor(
+@ConfigurationProperties("telegram", ignoreInvalidFields = false)
+data class TelegramConfig @ConstructorBinding constructor(
     val botToken: String,
     val botName: String,
     val developer: String,
     val developerId: String,
-    val botNameAliases: String?,
-    val yandexKey: String?,
     val paymentToken: String?,
+)
+
+@ConfigurationProperties("application", ignoreInvalidFields = false)
+data class AppConfig(
+    val yandexKey: String?,
+    val botNameAliases: String?,
     val ytdlLocation: String?,
     val openAiToken: String?
 )
