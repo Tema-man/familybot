@@ -1,6 +1,9 @@
 package dev.storozhenko.familybot.common.extensions
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
@@ -42,7 +45,11 @@ fun Boolean.toEmoji(): String {
 
 fun Int.rubles() = this * 100
 
-private val objectMapper = jacksonObjectMapper()
+private val objectMapper = jsonMapper {
+    addModule(kotlinModule())
+    addModule(JavaTimeModule())
+}
+
 fun mapper() = objectMapper
 
 fun Any.toJson(): String = objectMapper.writeValueAsString(this)
