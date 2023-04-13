@@ -4,8 +4,8 @@ import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.User
 import java.time.Instant
 
-class UserLeftIntent(
-    user: User,
-    chat: Chat,
-    date: Instant
-) : Intent(user, chat, date)
+data class UserLeftIntent(
+    override val from: User,
+    override val chat: Chat,
+    override val date: Instant
+) : Intent(from, chat, date)

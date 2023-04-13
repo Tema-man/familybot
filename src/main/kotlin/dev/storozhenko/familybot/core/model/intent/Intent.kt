@@ -6,9 +6,9 @@ import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import java.time.Instant
 
 abstract class Intent(
-    val from: User,
-    val chat: Chat,
-    val date: Instant
+    open val from: User,
+    open val chat: Chat,
+    open val date: Instant
 ) {
     val userAndChatKey get() = UserAndChatEasyKey(from.id, chat.id)
 }

@@ -36,6 +36,7 @@ dependencies {
     implementation("io.lettuce:lettuce-core:6.2.3.RELEASE")
     implementation("org.aspectj:aspectjweaver:1.9.19")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.2")
     implementation("org.telegram:telegrambots:6.5.0")
     implementation("org.tomlj:tomlj:1.1.0")

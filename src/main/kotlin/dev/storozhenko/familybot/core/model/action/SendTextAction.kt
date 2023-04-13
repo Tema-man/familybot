@@ -1,8 +1,9 @@
 package dev.storozhenko.familybot.core.model.action
 
+import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 
-class SendTextAction(
+data class SendTextAction(
     val text: String,
-    override val context: ExecutorContext
-) : Action(context)
+    override val chat: Chat
+) : Action(chat)

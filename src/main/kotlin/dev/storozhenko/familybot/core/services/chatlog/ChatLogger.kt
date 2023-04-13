@@ -14,6 +14,8 @@ import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.repository.RawChatLogRepository
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.getLogger
+import dev.storozhenko.familybot.telegram.toChat
+import dev.storozhenko.familybot.telegram.toUser
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
