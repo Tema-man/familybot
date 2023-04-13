@@ -1,6 +1,6 @@
 package dev.storozhenko.familybot.suits
 
-import dev.storozhenko.familybot.telegram.BotStarter
+import dev.storozhenko.familybot.FamilyBotApplication
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 
 @SpringBootTest
-@ActiveProfiles(BotStarter.TESTING_PROFILE_NAME)
+@ActiveProfiles(FamilyBotApplication.TESTING_PROFILE_NAME)
 @ExtendWith(SpringExtension::class)
 abstract class FamilybotApplicationTest {
 

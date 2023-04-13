@@ -1,7 +1,8 @@
 package dev.storozhenko.familybot
 
+import dev.storozhenko.familybot.FamilyBotApplication.Profile.NOT_TESTING_PROFILE_NAME
+import dev.storozhenko.familybot.core.bot.AbstractBot
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.telegram.BotStarter
 import dev.storozhenko.familybot.telegram.TelegramBot
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
@@ -10,10 +11,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.context.properties.bind.ConstructorBinding
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
+import org.springframework.context.event.EventListener
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.scheduling.annotation.EnableScheduling
 
@@ -23,6 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
     AppConfig::class,
     TelegramConfig::class
 )
+@Profile(NOT_TESTING_PROFILE_NAME)
 class FamilyBotApplication(
     private val env: ConfigurableEnvironment
 ) {
@@ -63,8 +68,17 @@ class FamilyBotApplication(
                 appConfig::openAiToken,
                 "OpenAI token is missing, API won't work"
             ),
-            testEnvironment = env.activeProfiles.contains(BotStarter.TESTING_PROFILE_NAME)
+            testEnvironment = env.activeProfiles.contains(TESTING_PROFILE_NAME)
         )
+    }
+
+    @EventListener(ApplicationReadyEvent::class)
+    fun startBots(event: ApplicationReadyEvent) {
+        val bots = event.applicationContext.getBeansOfType(AbstractBot::class.java).values
+
+        bots.forEach { bot ->
+            bot.start(event.applicationContext)
+        }
     }
 
     private fun requireValue(value: String, valueName: String): String =
@@ -74,6 +88,11 @@ class FamilyBotApplication(
         value()
             ?.takeIf(String::isNotBlank)
             .also { if (it == null) logger.warn(log) }
+
+    companion object Profile {
+        const val TESTING_PROFILE_NAME = "testing"
+        const val NOT_TESTING_PROFILE_NAME = "!$TESTING_PROFILE_NAME"
+    }
 }
 
 @ConfigurationProperties("telegram", ignoreInvalidFields = false)
