@@ -2,15 +2,22 @@ package dev.storozhenko.familybot.telegram
 
 import dev.storozhenko.familybot.common.extensions.key
 import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
+import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.settings.UserAndChatEasyKey
 import dev.storozhenko.familybot.core.services.talking.Dictionary
-import org.telegram.telegrambots.meta.api.objects.*
+import org.telegram.telegrambots.meta.api.objects.EntityType
+import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Update
+import java.time.Instant
+import org.telegram.telegrambots.meta.api.objects.Chat as TelegramChat
+import org.telegram.telegrambots.meta.api.objects.User as TelegramUser
 
-fun Chat.toChat(): dev.storozhenko.familybot.core.model.Chat = dev.storozhenko.familybot.core.model.Chat(id, title)
+fun TelegramChat.toChat(): Chat = Chat(id, title)
 
-fun User.toUser(chat: dev.storozhenko.familybot.core.model.Chat? = null, telegramChat: Chat? = null): dev.storozhenko.familybot.core.model.User {
+fun TelegramUser.toUser(chat: Chat? = null, telegramChat: TelegramChat? = null): User {
     val internalChat = telegramChat?.toChat()
         ?: chat
         ?: throw TelegramBot.InternalException("Should be some chat to map user to internal model")
@@ -19,18 +26,21 @@ fun User.toUser(chat: dev.storozhenko.familybot.core.model.Chat? = null, telegra
     } else {
         firstName
     }
-    return dev.storozhenko.familybot.core.model.User(id, internalChat, formattedName, userName)
+    return User(id, internalChat, formattedName, userName)
 }
 
-fun Update.toChat(): dev.storozhenko.familybot.core.model.Chat {
-    return when {
-        hasMessage() -> dev.storozhenko.familybot.core.model.Chat(message.chat.id, message.chat.title)
-        hasEditedMessage() -> dev.storozhenko.familybot.core.model.Chat(editedMessage.chat.id, editedMessage.chat.title)
-        else -> dev.storozhenko.familybot.core.model.Chat(
-            callbackQuery.message.chat.id,
-            callbackQuery.message.chat.title
-        )
+fun Update.toChat(): Chat {
+    val (id, title) = when {
+        hasMessage() -> message.chat.id to message.chat.title
+        hasEditedMessage() -> editedMessage.chat.id to editedMessage.chat.title
+        else -> callbackQuery.message.chat.id to callbackQuery.message.chat.title
     }
+
+    return Chat(
+        id = id,
+        name = title,
+        isGroup = message?.chat?.let { it.isGroupChat || it.isSuperGroupChat } ?: false
+    )
 }
 
 fun Update.chatId(): Long {
@@ -45,13 +55,28 @@ fun Update.chatIdString(): String {
     return chatId().toString()
 }
 
-fun Update.toUser(): dev.storozhenko.familybot.core.model.User {
-    val user = from()
+internal fun Update.toUser(botConfig: BotConfig?, user: TelegramUser): User {
     val formattedName = (user.firstName.let { "$it " }) + (user.lastName ?: "")
-    return dev.storozhenko.familybot.core.model.User(user.id, toChat(), formattedName, user.userName)
+    val isFromDeveloper = botConfig?.let { it.developer == user.userName } ?: false
+    val role = when {
+        isFromDeveloper -> User.Role.DEVELOPER
+        user.isBot -> User.Role.BOT
+        else -> User.Role.USER
+    }
+    return User(
+        id = user.id,
+        chat = toChat(),
+        role = role,
+        name = formattedName,
+        nickname = user.userName
+    )
 }
 
-fun Update.from(): User {
+internal fun Update.toUser(config: BotConfig): User = toUser(config, from())
+
+fun Update.toUser(): User = toUser(null, from())
+
+fun Update.from(): TelegramUser {
     return when {
         hasMessage() -> message.from
         hasEditedMessage() -> editedMessage.from
@@ -98,6 +123,8 @@ fun Message.getCommand(botName: String): Command? {
     return null
 }
 
+internal fun Update.command(botConfig: BotConfig): Command? = message?.getCommand(botConfig.botName)
+
 fun Update.getMessageTokens(delimiter: String = " "): List<String> {
     return if (message.hasText()) {
         message.text.split(delimiter)
@@ -105,3 +132,8 @@ fun Update.getMessageTokens(delimiter: String = " "): List<String> {
         emptyList()
     }
 }
+
+internal fun Update.date(): Instant =
+    message?.date?.toLong()
+        ?.let { Instant.ofEpochSecond(it) }
+        ?: Instant.now()
