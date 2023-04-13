@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.core.services.misc
+package dev.storozhenko.familybot.core.services.chatlog
 
 import dev.storozhenko.familybot.common.extensions.toJson
 import dev.storozhenko.familybot.core.repository.RawChatLogRepository
@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import java.time.Instant
 
 @Component
+@Deprecated("Will be deleted", replaceWith = ReplaceWith("ChatLogger"))
 class RawUpdateLogger(private val rawChatLogRepository: RawChatLogRepository) {
 
     fun log(update: Update) {
