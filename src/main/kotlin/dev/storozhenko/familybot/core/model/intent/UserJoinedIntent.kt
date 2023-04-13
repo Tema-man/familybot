@@ -5,10 +5,11 @@ import dev.storozhenko.familybot.core.model.User
 import java.time.Instant
 
 class UserJoinedIntent(
+    user: User,
     chat: Chat,
     date: Instant,
 ) : Intent(
-    from = User.SERVICE,
+    from = user,
     chat = chat,
     date = date
 )

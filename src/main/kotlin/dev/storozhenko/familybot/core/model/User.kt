@@ -27,14 +27,4 @@ data class User(
     enum class Role {
         BOT, DEVELOPER, ADMIN, USER
     }
-
-    companion object {
-        val SERVICE = User(
-            id = Long.MIN_VALUE,
-            chat = Chat(id = 0, name = null, idString = "", isGroup = false),
-            name = "",
-            nickname = null,
-            role = Role.BOT
-        )
-    }
 }
