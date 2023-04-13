@@ -2,10 +2,10 @@ package dev.storozhenko.familybot.feature.help
 
 import dev.storozhenko.familybot.core.executor.PrivateMessageExecutor
 import dev.storozhenko.familybot.core.model.action.Action
-import dev.storozhenko.familybot.core.model.action.SendTextAction
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -18,16 +18,12 @@ class PrivateMessageHelpExecutor(
             return helpExecutor.execute(context)
         } else {
             return {
-//                it.send(
-//                    context,
-//                    context.phrase(Phrase.PRIVATE_MESSAGE_HELP),
-//                    shouldTypeBeforeSend = true
-//                )
-
-                SendTextAction(
-                    text = context.phrase(Phrase.PRIVATE_MESSAGE_HELP),
-                    context = context
+                it.send(
+                    context,
+                    context.phrase(Phrase.PRIVATE_MESSAGE_HELP),
+                    shouldTypeBeforeSend = true
                 )
+                null
             }
         }
     }

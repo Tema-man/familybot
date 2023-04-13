@@ -6,6 +6,7 @@ import dev.storozhenko.familybot.feature.pidor.services.PidorAutoSelectService
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
@@ -24,12 +25,8 @@ class ManualPidorSelectExecutor(
             }
                 .onFailure { exception -> exception.message }
 
-//            it.send(context, response.getOrDefault("error"))
-
-            SendTextAction(
-                text = response.getOrDefault("error"),
-                context = context
-            )
+            it.send(context, response.getOrDefault("error"))
+            null
         }
     }
 }
