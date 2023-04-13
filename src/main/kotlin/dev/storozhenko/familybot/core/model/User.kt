@@ -1,14 +1,16 @@
 package dev.storozhenko.familybot.core.model
 
-import dev.storozhenko.familybot.core.model.Chat
+import dev.storozhenko.familybot.core.services.settings.UserEasyKey
 
 data class User(
     val id: Long,
     @Deprecated("Chat will be removed from user model", replaceWith = ReplaceWith("Intent.chat")) val chat: Chat,
     val name: String?,
     val nickname: String?,
-    val developer: Boolean = false
+    val role: Role = Role.USER
 ) {
+
+    val key = UserEasyKey(id)
 
     fun getGeneralName(mention: Boolean = true): String {
         return if (mention) {
@@ -20,5 +22,19 @@ data class User(
         } else {
             name ?: "хуй знает кто"
         }
+    }
+
+    enum class Role {
+        BOT, DEVELOPER, ADMIN, USER
+    }
+
+    companion object {
+        val SERVICE = User(
+            id = Long.MIN_VALUE,
+            chat = Chat(id = 0, name = null, idString = "", isGroup = false),
+            name = "",
+            nickname = null,
+            role = Role.BOT
+        )
     }
 }
