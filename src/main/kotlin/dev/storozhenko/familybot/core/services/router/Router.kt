@@ -16,6 +16,7 @@ import dev.storozhenko.familybot.core.repository.ChatLogRepository
 import dev.storozhenko.familybot.core.repository.CommandHistoryRepository
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.repository.FunctionsConfigureRepository
+import dev.storozhenko.familybot.core.services.chatlog.RawUpdateLogger
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.*
@@ -39,13 +40,14 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 @Component
+@Deprecated("Will be replaced with IntentsRouter", ReplaceWith("IntentsRouter"))
 class Router(
     private val repository: CommonRepository,
     private val commandHistoryRepository: CommandHistoryRepository,
     private val executors: List<Executor>,
     private val chatLogRepository: ChatLogRepository,
     private val configureRepository: FunctionsConfigureRepository,
-    private val rawUpdateLogger: dev.storozhenko.familybot.core.services.misc.RawUpdateLogger,
+    private val rawUpdateLogger: RawUpdateLogger,
     private val botConfig: BotConfig,
     private val dictionary: Dictionary,
     private val meterRegistry: MeterRegistry,
