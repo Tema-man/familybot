@@ -3,38 +3,38 @@ package dev.storozhenko.familybot.feature.huificator
 import dev.storozhenko.familybot.common.extensions.dropLastDelimiter
 import dev.storozhenko.familybot.common.extensions.randomBoolean
 import dev.storozhenko.familybot.core.executor.Configurable
-import dev.storozhenko.familybot.core.executor.Executor
+import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.core.model.intent.Intent
+import dev.storozhenko.familybot.core.model.intent.TextMessageIntent
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
 import dev.storozhenko.familybot.core.services.settings.TalkingDensity
+import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.bots.AbsSender
 import java.util.regex.Pattern
 
 @Component
 class HuificatorExecutor(
     private val easyKeyValueService: EasyKeyValueService
-) : Executor, Configurable {
+) : IntentExecutor, Configurable {
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.HUIFICATE
 
-    override fun priority(context: ExecutorContext) = Priority.LOWEST
+    override val priority: Priority = Priority.LOWEST
 
-    override fun canExecute(context: ExecutorContext): Boolean = shouldHuificate(context)
+    override fun canExecute(intent: Intent): Boolean = shouldHuificate(intent)
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
-        val huifyed = huify(context.message.text.orEmpty()) ?: return { null }
-        return { it ->
-//            it.send(context, huifyed, shouldTypeBeforeSend = true)
-            SendTextAction(huifyed, context)
-        }
+    override fun execute(intent: Intent): Action? {
+        if (intent !is TextMessageIntent) return null
+        val huifyed = huify(intent.text) ?: return null
+        return SendTextAction(text = huifyed, chat = intent.chat)
     }
 
-    fun huify(word: String): String? {
+    private fun huify(word: String): String? {
         val lastWord = getLastWord(word).lowercase()
         return when {
             lastWord.length < 5 -> null
@@ -55,13 +55,14 @@ class HuificatorExecutor(
 
     private fun getLastWord(text: String) = text.split(regex = spaces).last()
 
-    private fun shouldHuificate(context: ExecutorContext): Boolean {
-        val density = getTalkingDensity(context)
+    private fun shouldHuificate(intent: Intent): Boolean {
+        if (intent !is TextMessageIntent) return false
+        val density = getTalkingDensity(intent)
         return if (density <= 3L) true else randomBoolean(density)
     }
 
-    private fun getTalkingDensity(context: ExecutorContext): Long =
-        easyKeyValueService.get(TalkingDensity, context.chatKey, 7)
+    private fun getTalkingDensity(intent: Intent): Long =
+        easyKeyValueService.get(TalkingDensity, intent.chat.key, 7)
 
     companion object {
         private const val vowels = "ёэоеаяуюыи"
