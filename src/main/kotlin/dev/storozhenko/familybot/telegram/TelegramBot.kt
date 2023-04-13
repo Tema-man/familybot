@@ -4,15 +4,18 @@ import dev.storozhenko.familybot.common.extensions.toJson
 import dev.storozhenko.familybot.core.bot.AbstractBot
 import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.core.executor.CommandExecutor
+import dev.storozhenko.familybot.core.model.intent.Intent
+import dev.storozhenko.familybot.core.services.router.IntentsRouter
 import dev.storozhenko.familybot.core.services.router.PaymentRouter
 import dev.storozhenko.familybot.core.services.router.PollRouter
-import dev.storozhenko.familybot.core.services.router.Router
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.telegram.mappers.MessageHandler
+import dev.storozhenko.familybot.telegram.action.handlers.ActionHandler
+import dev.storozhenko.familybot.telegram.intent.mappers.UpdateMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
@@ -32,28 +35,35 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 @Component
 class TelegramBot(
     val config: BotConfig,
-    val router: Router,
+    val intentsRouter: IntentsRouter,
     val pollRouter: PollRouter,
     val paymentRouter: PaymentRouter,
     val easyKeyValueService: EasyKeyValueService,
-    val messageHandlers: List<MessageHandler>
+    val actionHandlers: List<ActionHandler>,
+    val updateMapper: UpdateMapper
 ) : TelegramLongPollingBot(config.botToken), AbstractBot {
 
     private val log = LoggerFactory.getLogger(TelegramBot::class.java)
-    private val routerScope = CoroutineScope(Dispatchers.Default)
-    private val channels = HashMap<Long, Channel<Update>>()
+    private val routerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val channels = HashMap<Long, Channel<Intent>>()
 
     override fun getBotUsername(): String = config.botName
 
     override fun onUpdateReceived(tgUpdate: Update?) {
         val update = tgUpdate ?: throw InternalException("Update should not be null")
 
-        when {
-            update.hasPollAnswer() -> proceedPollAnswer(update)
-            update.hasPreCheckoutQuery() || update.message?.hasSuccessfulPayment() == true -> proceedPayment(update)
-            update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
-            update.hasPoll() -> {}
+        routerScope.launch {
+            updateMapper.map(update).forEach { intent ->
+                processIntent(intent)
+            }
         }
+
+//        when {
+//            update.hasPollAnswer() -> proceedPollAnswer(update)
+//            update.hasPreCheckoutQuery() || update.message?.hasSuccessfulPayment() == true -> proceedPayment(update)
+//            update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
+//            update.hasPoll() -> {}
+//        }
     }
 
     override fun start(context: ConfigurableApplicationContext) {
@@ -80,55 +90,46 @@ class TelegramBot(
             .onFailure { log.warn("pollRouter.proceed failed", it) }
     }
 
-    private fun proceedMessage(update: Update) = routerScope.launch {
-        val chat = update.toChat()
-        val channel = channels.computeIfAbsent(chat.id) { createChannel() }
-        channel.send(update)
+    private suspend fun processIntent(intent: Intent) {
+        channels.getOrPut(intent.chat.id) { createChannel() }.send(intent)
     }
 
-    private fun createChannel(): Channel<Update> {
-        val channel = Channel<Update>()
+    private fun createChannel(): Channel<Intent> = Channel<Intent>().also { channel ->
         routerScope.launch {
             for (incomingUpdate in channel) {
                 proceed(incomingUpdate)
             }
         }
-        return channel
     }
 
-    private suspend fun proceed(update: Update) {
+    private suspend fun proceed(intent: Intent) {
         try {
-            val user = update.toUser()
-            MDC.put("chat", "${user.chat.name}:${user.chat.id}")
+            val user = intent.from
+            MDC.put("chat", "${intent.chat.name}:${intent.chat.id}")
             MDC.put("user", "${user.name}:${user.id}")
-            val message = router.processUpdate(update).invoke(this@TelegramBot)
 
-            if (message != null) {
-                messageHandlers.any {
-                    it.handle(message, this@TelegramBot)
-                }
+            val action = intentsRouter.processIntent(intent)
+            log.info("Executing action: $action")
+
+            if (action != null) {
+                actionHandlers.any { it.handle(action, this@TelegramBot) }
             }
-
         } catch (e: TelegramApiRequestException) {
-            val logMessage =
-                "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
+            val logMessage = "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${intent.toJson()}"
+
             if (e.errorCode in 400..499) {
                 log.warn(logMessage, e)
                 if (e.apiResponse.contains("CHAT_WRITE_FORBIDDEN")) {
                     listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack)
                         .forEach { function ->
-                            easyKeyValueService.put(
-                                function,
-                                ChatEasyKey(update.toChat().id),
-                                false
-                            )
+                            easyKeyValueService.put(function, ChatEasyKey(intent.chat.id), false)
                         }
                 }
             } else {
                 log.error(logMessage, e)
             }
         } catch (e: Exception) {
-            log.error("Unexpected error, update is ${update.toJson()}", e)
+            log.error("Unexpected error, update is ${intent.toJson()}", e)
         } finally {
             MDC.clear()
         }
