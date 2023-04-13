@@ -1,7 +1,7 @@
 package dev.storozhenko.familybot.core.model.action
 
-import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.model.Chat
 
 abstract class Action(
-    open val context: ExecutorContext
+    open val chat: Chat
 )

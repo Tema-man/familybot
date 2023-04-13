@@ -1,4 +1,4 @@
-package dev.storozhenko.familybot.telegram.mappers
+package dev.storozhenko.familybot.telegram.action.handlers
 
 import dev.storozhenko.familybot.common.extensions.randomInt
 import dev.storozhenko.familybot.common.extensions.toJson
@@ -10,8 +10,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.bots.AbsSender
 
-abstract class MessageHandler {
-    abstract suspend fun handle(message: Action, sender: AbsSender): Boolean
+abstract class ActionHandler {
+    abstract suspend fun handle(action: Action, sender: AbsSender): Boolean
 
     protected suspend fun sendInternal(
         chatId: String,
