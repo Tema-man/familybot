@@ -46,7 +46,7 @@ class UpdateMapper(
     private fun mapUserLeftIntent(update: Update): Intent? {
         val userLeft = update.message?.leftChatMember ?: return null
         return UserLeftIntent(
-            user = update.toUser(botConfig, userLeft),
+            from = update.toUser(botConfig, userLeft),
             chat = update.toChat(),
             date = update.date(),
         )
@@ -55,7 +55,7 @@ class UpdateMapper(
     private fun mapUserJoinedIntent(update: Update): List<Intent> =
         update.message?.newChatMembers.orEmpty().map { tgUser ->
             UserJoinedIntent(
-                user = update.toUser(botConfig, tgUser),
+                from = update.toUser(botConfig, tgUser),
                 chat = update.toChat(),
                 date = update.date(),
             )

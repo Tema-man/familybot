@@ -6,6 +6,10 @@ import dev.storozhenko.familybot.core.bot.BotConfig
 import dev.storozhenko.familybot.telegram.TelegramBot
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
@@ -32,6 +36,7 @@ class FamilyBotApplication(
     private val env: ConfigurableEnvironment
 ) {
     private val logger = getLogger()
+    private val launchScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @[Bean Suppress("unused")]
     fun injectTimedAspect(registry: MeterRegistry): TimedAspect = TimedAspect(registry)
@@ -76,8 +81,10 @@ class FamilyBotApplication(
     fun startBots(event: ApplicationReadyEvent) {
         val bots = event.applicationContext.getBeansOfType(AbstractBot::class.java).values
 
-        bots.forEach { bot ->
-            bot.start(event.applicationContext)
+        launchScope.launch {
+            bots.forEach { bot ->
+                bot.start(event.applicationContext)
+            }
         }
     }
 

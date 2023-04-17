@@ -66,7 +66,7 @@ class TelegramBot(
 //        }
     }
 
-    override fun start(context: ConfigurableApplicationContext) {
+    override suspend fun start(context: ConfigurableApplicationContext) {
         TelegramBotsApi(DefaultBotSession::class.java).also { it.registerBot(this) }
 
         val commands = context.getBeansOfType(CommandExecutor::class.java).values.asSequence()
