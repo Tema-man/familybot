@@ -4,9 +4,8 @@ import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.User
 import java.time.Instant
 
-data class UserJoinedIntent(
+data class BotAddedToChatIntent(
     override val id: String,
-    override val from: User,
     override val chat: Chat,
-    override val date: Instant,
-) : Intent(id, from, chat, date)
+    override val date: Instant
+) : Intent(id, User.SYSTEM, chat, date)

@@ -14,8 +14,6 @@ import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.repository.RawChatLogRepository
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.telegram.toChat
-import dev.storozhenko.familybot.telegram.toUser
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
@@ -42,6 +40,11 @@ class ChatLogger(
     }
 
     fun registerIntent(intent: Intent) {
+        if (intent.from.role == User.Role.SYSTEM) {
+            logger.info("Received a SYSTEM message, Won't log!")
+            return
+        }
+
         loggingScope.launch(loggingExceptionHandler) {
             val chat = intent.chat
 
@@ -60,7 +63,9 @@ class ChatLogger(
                 is CommandIntent -> registerCommand(intent)
             }
 
-            if (intent.from.role != User.Role.BOT || intent.from.nickname == "GroupAnonymousBot") repository.addUser(intent.from)
+            if (intent.from.role != User.Role.BOT || intent.from.nickname == "GroupAnonymousBot") repository.addUser(
+                intent.from
+            )
 
             logRawIntent(intent)
         }
