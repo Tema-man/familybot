@@ -74,6 +74,9 @@ internal fun Update.toUser(botConfig: BotConfig?, user: TelegramUser): User {
 
 internal fun Update.toUser(config: BotConfig): User = toUser(config, from())
 
+internal fun Update.getMessageId(): String =
+    ((message ?: editedMessage ?: callbackQuery.message)?.messageId ?: updateId).toString()
+
 fun Update.toUser(): User = toUser(null, from())
 
 fun Update.from(): TelegramUser {
