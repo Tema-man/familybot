@@ -25,6 +25,21 @@ data class User(
     }
 
     enum class Role {
-        BOT, DEVELOPER, ADMIN, USER
+        BOT, DEVELOPER, ADMIN, USER, SYSTEM
+    }
+
+    companion object {
+        val SYSTEM = User(
+            id = Long.MIN_VALUE,
+            chat = Chat(
+                id = Long.MIN_VALUE,
+                name = null,
+                idString = "",
+                isGroup = false
+            ),
+            name = null,
+            nickname = null,
+            role = Role.SYSTEM
+        )
     }
 }
