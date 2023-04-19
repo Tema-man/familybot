@@ -1,43 +1,56 @@
 package dev.storozhenko.familybot.feature.pidor
 
-import dev.storozhenko.familybot.common.extensions.*
-import dev.storozhenko.familybot.core.executor.CommandExecutor
+import dev.storozhenko.familybot.common.extensions.DateConstants
+import dev.storozhenko.familybot.common.extensions.PluralizedWordsProvider
+import dev.storozhenko.familybot.common.extensions.bold
+import dev.storozhenko.familybot.common.extensions.formatTopList
 import dev.storozhenko.familybot.core.executor.Configurable
-import dev.storozhenko.familybot.core.repository.CommonRepository
-import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.core.services.router.model.FunctionId
-import dev.storozhenko.familybot.core.services.talking.model.Phrase
+import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.Pidor
 import dev.storozhenko.familybot.core.model.action.Action
-import dev.storozhenko.familybot.telegram.send
+import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.core.model.intent.CommandIntent
+import dev.storozhenko.familybot.core.model.intent.Intent
+import dev.storozhenko.familybot.core.repository.CommonRepository
+import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.services.router.model.FunctionId
+import dev.storozhenko.familybot.core.services.router.model.Priority
+import dev.storozhenko.familybot.core.services.talking.Dictionary
+import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
 class PidorStatsWorldExecutor(
-    private val repository: CommonRepository
-) : CommandExecutor(), Configurable {
+    private val repository: CommonRepository,
+    private val dictionary: Dictionary
+) : IntentExecutor /*CommandExecutor()*/, Configurable {
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    override fun command() = Command.STATS_WORLD
+    val command = Command.STATS_WORLD
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
-        val pidorsByChat = repository.getAllPidors(
-            startDate = DateConstants.theBirthDayOfFamilyBot
-        )
+    override val priority: Priority = Priority.MEDIUM
+
+    override fun canExecute(intent: Intent): Boolean = (intent as? CommandIntent)?.command == command
+
+    override fun execute(intent: Intent): Action? {
+        val pidorsByChat = repository.getAllPidors(startDate = DateConstants.theBirthDayOfFamilyBot)
             .map(Pidor::user)
             .formatTopList(
                 PluralizedWordsProvider(
-                    one = { context.phrase(Phrase.PLURALIZED_COUNT_ONE) },
-                    few = { context.phrase(Phrase.PLURALIZED_COUNT_FEW) },
-                    many = { context.phrase(Phrase.PLURALIZED_COUNT_MANY) }
+                    one = { dictionary.get(Phrase.PLURALIZED_COUNT_ONE, intent.chat.key) },
+                    few = { dictionary.get(Phrase.PLURALIZED_COUNT_FEW, intent.chat.key) },
+                    many = { dictionary.get(Phrase.PLURALIZED_COUNT_MANY, intent.chat.key) }
                 )
             )
             .take(100)
 
-        val title = "${context.phrase(Phrase.PIDOR_STAT_WORLD)}:\n".bold()
-        return { it.send(context, title + pidorsByChat.joinToString("\n"), enableHtml = true); null }
+        val title = "${dictionary.get(Phrase.PIDOR_STAT_WORLD, intent.chat.key)}:\n".bold()
+        return SendTextAction(
+            text = title + pidorsByChat.joinToString("\n"),
+            chat = intent.chat,
+            enableRichFormatting = true
+        )
     }
 }
