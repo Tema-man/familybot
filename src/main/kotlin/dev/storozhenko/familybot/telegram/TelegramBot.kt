@@ -11,7 +11,7 @@ import dev.storozhenko.familybot.core.services.router.PollRouter
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
-import dev.storozhenko.familybot.telegram.action.handlers.ActionHandler
+import dev.storozhenko.familybot.telegram.action.TGActionProcessor
 import dev.storozhenko.familybot.telegram.intent.mappers.UpdateMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +39,7 @@ class TelegramBot(
     val pollRouter: PollRouter,
     val paymentRouter: PaymentRouter,
     val easyKeyValueService: EasyKeyValueService,
-    val actionHandlers: List<ActionHandler>,
+    val actionProcessor: TGActionProcessor,
     val updateMapper: UpdateMapper
 ) : TelegramLongPollingBot(config.botToken), AbstractBot {
 
@@ -112,7 +112,7 @@ class TelegramBot(
             log.info("Executing action: $action")
 
             if (action != null) {
-                actionHandlers.any { it.handle(action, this@TelegramBot) }
+                actionProcessor.handle(action, this@TelegramBot)
             }
         } catch (e: TelegramApiRequestException) {
             val logMessage = "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${intent.toJson()}"
@@ -120,18 +120,21 @@ class TelegramBot(
             if (e.errorCode in 400..499) {
                 log.warn(logMessage, e)
                 if (e.apiResponse.contains("CHAT_WRITE_FORBIDDEN")) {
-                    listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack)
-                        .forEach { function ->
-                            easyKeyValueService.put(function, ChatEasyKey(intent.chat.id), false)
-                        }
+                    disableChattingFunctions(intent)
                 }
             } else {
                 log.error(logMessage, e)
             }
         } catch (e: Exception) {
-            log.error("Unexpected error, update is ${intent.toJson()}", e)
+            log.error("Unexpected error while processing intent: ${intent.toJson()}", e)
         } finally {
             MDC.clear()
+        }
+    }
+
+    private fun disableChattingFunctions(intent: Intent) {
+        listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack).forEach { function ->
+            easyKeyValueService.put(function, ChatEasyKey(intent.chat.id), false)
         }
     }
 

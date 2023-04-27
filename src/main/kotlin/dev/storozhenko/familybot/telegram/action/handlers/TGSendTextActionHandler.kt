@@ -13,7 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class SendTextActionHandler : ActionHandler {
+class TGSendTextActionHandler : TGActionHandler {
+
+    override val actionClass = SendTextAction::class.java
 
     override suspend fun handle(action: Action, sender: AbsSender): Boolean {
         if (action !is SendTextAction) return false
