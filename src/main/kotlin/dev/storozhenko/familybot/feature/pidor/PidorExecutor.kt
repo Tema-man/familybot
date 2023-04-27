@@ -2,34 +2,28 @@ package dev.storozhenko.familybot.feature.pidor
 
 import dev.storozhenko.familybot.common.extensions.*
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.core.executor.CommandExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
+import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.Pidor
 import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.core.model.action.Action
+import dev.storozhenko.familybot.core.model.action.CompositeAction
+import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.core.model.intent.CommandIntent
+import dev.storozhenko.familybot.core.model.intent.Intent
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
+import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
 import dev.storozhenko.familybot.feature.pidor.services.PidorCompetitionService
 import dev.storozhenko.familybot.feature.pidor.services.PidorStrikesService
 import dev.storozhenko.familybot.getLogger
-import dev.storozhenko.familybot.telegram.send
-import dev.storozhenko.familybot.telegram.sendContextFree
-import dev.storozhenko.familybot.telegram.toUser
-import dev.storozhenko.familybot.telegram.user
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -41,29 +35,35 @@ class PidorExecutor(
     private val easyKeyValueService: EasyKeyValueService,
     private val botConfig: BotConfig,
     private val dictionary: Dictionary
-) : CommandExecutor(), Configurable {
+) : IntentExecutor /*CommandExecutor()*/, Configurable {
 
     private val log = getLogger()
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    override fun command(): Command = Command.PIDOR
+    val command: Command = Command.PIDOR
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
-        val chat = context.chat
-        if (context.message.isReply) {
-            return pickPidor(context)
-        }
+    override val priority: Priority = Priority.MEDIUM
+
+    override fun canExecute(intent: Intent): Boolean = (intent as? CommandIntent)?.command == command
+
+    override fun execute(intent: Intent): Action? {
+        val chat = intent.chat
+        // TODO: Add ReplyIntent.
+//        if (intent.message.isReply) {
+//            return pickPidor(intent)
+//        }
         log.info("Getting pidors from chat $chat")
-        val key = context.chatKey
-        return selectPidor(chat, key).first
+
+        return selectPidor(intent).first
     }
 
     fun selectPidor(
-        chat: Chat,
-        key: ChatEasyKey,
+        intent: Intent,
         silent: Boolean = false
-    ): Pair<(suspend (AbsSender) -> Action?), Boolean> {
+    ): Pair<Action?, Boolean> {
+        val chat = intent.chat
+        val key = intent.chat.key
         val users = repository.getUsers(chat, activeOnly = true)
 
         val pidorToleranceValue = easyKeyValueService.get(PidorTolerance, key)
@@ -71,89 +71,74 @@ class PidorExecutor(
             log.info("Pidors are already found")
             if (!silent) {
                 val message = getMessageForPidors(chat, key)
-                if (message != null) {
-                    return Pair({ it.execute(message); null }, false)
-                }
+                if (message != null) return Pair(message, false)
             } else {
-                return Pair({ null }, false)
+                return Pair(null, false)
             }
         }
-        return Pair({ sender ->
-            log.info("Pidor is not found, initiating search procedure")
-            val nextPidor = if (easyKeyValueService.get(BotOwnerPidorSkip, key, false)) {
-                val filteredUsers = users.filter { botConfig.developerId != it.id.toString() }
-                getNextPidorAsync(filteredUsers, sender, chat)
-            } else {
-                getNextPidorAsync(users, sender, chat)
+
+        log.info("Pidor is not found, initiating search procedure")
+        val pidor = getNextPidor(chat)
+
+        val messages = listOf(
+            Phrase.PIDOR_SEARCH_START,
+            Phrase.PIDOR_SEARCH_MIDDLE,
+            Phrase.PIDOR_SEARCH_FINISHER
+        )
+            .map { phrase ->
+                SendTextAction(
+                    text = dictionary.get(phrase, key).bold(),
+                    enableRichFormatting = true,
+                    chat = chat
+                )
             }
-
-
-            listOf(
-                Phrase.PIDOR_SEARCH_START,
-                Phrase.PIDOR_SEARCH_MIDDLE,
-                Phrase.PIDOR_SEARCH_FINISHER
-            )
-                .map { phrase -> dictionary.get(phrase, key) }
-                .map(String::bold)
-                .forEach { phrase ->
-                    sender.sendContextFree(
-                        chat.idString,
-                        phrase,
-                        botConfig,
-                        enableHtml = true,
-                        shouldTypeBeforeSend = true,
-                        typeDelay = 1500 to 1501
+            .toMutableList()
+            .apply {
+                add(
+                    SendTextAction(
+                        text = pidor.getGeneralName(),
+                        enableRichFormatting = true,
+                        chat = chat
                     )
-                }
-            val pidor = nextPidor.await()
-            sender.sendContextFree(
-                chat.idString,
-                pidor.getGeneralName(),
-                botConfig,
-                enableHtml = true,
-                shouldTypeBeforeSend = true,
-                typeDelay = 1500 to 1501
-            )
-            if (pidorToleranceValue == null) {
-                easyKeyValueService.put(PidorTolerance, key, 1, untilNextDay())
-            } else {
-                easyKeyValueService.increment(PidorTolerance, key)
+                )
             }
-            pidorStrikesService.calculateStrike(chat, key, pidor).invoke(sender)
-            pidorCompetitionService.pidorCompetition(chat, key).invoke(sender)
-            null
-        }, true)
+
+        if (pidorToleranceValue == null) {
+            easyKeyValueService.put(PidorTolerance, key, 1, untilNextDay())
+        } else {
+            easyKeyValueService.increment(PidorTolerance, key)
+        }
+
+        //TODO: Add to intent hooks?
+        /*
+        pidorStrikesService.calculateStrike(chat, key, pidor).invoke(sender)
+        pidorCompetitionService.pidorCompetition(chat, key).invoke(sender)
+        */
+
+        val action = CompositeAction(messages, chat)
+        return Pair(action, true)
     }
 
-    private suspend fun getNextPidorAsync(
-        users: List<User>,
-        sender: AbsSender,
-        chat: Chat
-    ): Deferred<User> {
-        return coroutineScope {
-            async {
-                runCatching {
-                    users
-                        .map { user -> launch { checkIfUserStillThere(user, sender) } }
-                        .forEach { job -> job.join() }
-                    val actualizedUsers = repository.getUsers(chat, activeOnly = true)
-                    log.info("Users to roll: {}", actualizedUsers)
-                    val nextPidor = actualizedUsers.randomOrNull() ?: getFallbackPidor(chat)
-
-                    log.info("Pidor is rolled to $nextPidor")
-                    val newPidor = Pidor(nextPidor, Instant.now())
-                    repository.addPidor(newPidor)
-                    nextPidor
+    private fun getNextPidor(chat: Chat): User {
+        return runCatching {
+            val users = repository.getUsers(chat, activeOnly = true).also { users ->
+                if (easyKeyValueService.get(BotOwnerPidorSkip, chat.key, false)) users.filter { user ->
+                    botConfig.developerId != user.id.toString()
                 }
-                    .onFailure { e ->
-                        log.error(
-                            "Something bad is happened on rolling, investigate",
-                            e
-                        )
-                    }
-                    .getOrNull() ?: getFallbackPidor(chat)
             }
+            log.info("Users to roll: {}", users)
+
+            val nextPidor = users.randomOrNull() ?: getFallbackPidor(chat)
+            log.info("Pidor is rolled to $nextPidor")
+
+            val newPidor = Pidor(nextPidor, Instant.now())
+            repository.addPidor(newPidor)
+            nextPidor
         }
+            .onFailure { e ->
+                log.error("Something bad is happened on rolling, investigate", e)
+            }
+            .getOrNull() ?: getFallbackPidor(chat)
     }
 
     private fun getFallbackPidor(chat: Chat): User {
@@ -164,10 +149,9 @@ class PidorExecutor(
             .user
     }
 
-    private fun checkIfUserStillThere(
-        user: User,
-        sender: AbsSender
-    ) {
+    // TODO: Extract to users actualizer service
+    /*
+    private fun checkIfUserStillThere(user: User) {
         val userFromChat = getUserFromChat(user, sender)
         if (userFromChat == null) {
             log.warn("Some user {} has left without notification", user)
@@ -177,27 +161,40 @@ class PidorExecutor(
         }
     }
 
-    private fun getMessageForPidors(chat: Chat, key: ChatEasyKey): SendMessage? {
+    private fun getUserFromChat(user: User, absSender: AbsSender): User? {
+        val getChatMemberCall = GetChatMember(user.chat.idString, user.id)
+        return runCatching {
+            absSender.execute(getChatMemberCall)
+                .apply { log.info("Chat member status: $this ") }
+                .takeIf { member -> member.status != "left" && member.status != "kicked" }
+                ?.user()
+                ?.toUser(user.chat)
+        }.getOrNull()
+    }
+
+    */
+
+    private fun getMessageForPidors(chat: Chat, key: ChatEasyKey): Action? {
         val pidorsByChat: List<List<Pidor>> = repository
             .getPidorsByChat(chat)
             .filter { pidor -> pidor.date.isToday() }
             .groupBy { (user) -> user.id }
             .map(Map.Entry<Long, List<Pidor>>::value)
+
         return when (pidorsByChat.size) {
             0 -> null
-            1 -> {
-                SendMessage(
-                    chat.idString,
-                    dictionary.get(Phrase.PIROR_DISCOVERED_ONE, key) + " " +
-                        formatName(pidorsByChat.first(), key)
-                ).apply { enableHtml(true) }
-            }
+            1 -> SendTextAction(
+                text = dictionary.get(Phrase.PIROR_DISCOVERED_ONE, key) + " " + formatName(pidorsByChat.first(), key),
+                enableRichFormatting = true,
+                chat = chat
+            )
 
-            else -> SendMessage(
-                chat.idString,
-                dictionary.get(Phrase.PIROR_DISCOVERED_MANY, key) + " " +
-                    pidorsByChat.joinToString { formatName(it, key) }
-            ).apply { enableHtml(true) }
+            else -> SendTextAction(
+                text = dictionary.get(Phrase.PIROR_DISCOVERED_MANY, key) + " " +
+                    pidorsByChat.joinToString { formatName(it, key) },
+                enableRichFormatting = true,
+                chat = chat
+            )
         }
     }
 
@@ -228,18 +225,8 @@ class PidorExecutor(
         return pidorToleranceValue >= limit
     }
 
-    private fun getUserFromChat(user: User, absSender: AbsSender): User? {
-        val getChatMemberCall = GetChatMember(user.chat.idString, user.id)
-        return runCatching {
-            absSender.execute(getChatMemberCall)
-                .apply { log.info("Chat member status: $this ") }
-                .takeIf { member -> member.status != "left" && member.status != "kicked" }
-                ?.user()
-                ?.toUser(user.chat)
-        }.getOrNull()
-    }
-
-    private fun pickPidor(context: ExecutorContext): suspend (AbsSender) -> Action? {
+//TODO: Enable after ReplyIntent implementation
+    /*private fun pickPidor(context: ExecutorContext): suspend (AbsSender) -> Action? {
         val abilityCount = easyKeyValueService.get(PickPidorAbilityCount, context.userKey, 0L)
         if (abilityCount <= 0L) {
             return {
@@ -252,7 +239,6 @@ class PidorExecutor(
                 null
             }
         }
-        val replyMessage = context.message.replyToMessage
 
         if (replyMessage.from.isBot) {
             if (replyMessage.from.userName == botConfig.botName) {
@@ -312,5 +298,5 @@ class PidorExecutor(
                 null
             }
         }
-    }
+    }*/
 }
