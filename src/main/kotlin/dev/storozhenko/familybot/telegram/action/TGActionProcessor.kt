@@ -13,7 +13,7 @@ class TGActionProcessor(
     private val handlers: Map<Class<*>, TGActionHandler>
 
     init {
-        handlers = handlersList.associateBy { it.javaClass }
+        handlers = handlersList.associateBy { it.actionClass }
     }
 
     suspend fun handle(action: Action, sender: AbsSender) {

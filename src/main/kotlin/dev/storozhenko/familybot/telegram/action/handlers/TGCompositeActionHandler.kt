@@ -21,7 +21,7 @@ class TGCompositeActionHandler(
 
         var handled = false
         action.actions.forEach { childAction ->
-            val handler = handlers[action.javaClass]
+            val handler = handlers[childAction.javaClass]
             handled = if (handler == null) {
                 getLogger().warn("No handler found for ${action.javaClass}")
                 false
