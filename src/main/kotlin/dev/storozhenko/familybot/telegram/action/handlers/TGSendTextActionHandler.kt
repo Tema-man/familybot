@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
+import kotlin.math.ln
 
 @Component
 class TGSendTextActionHandler : TGActionHandler {
@@ -26,7 +27,10 @@ class TGSendTextActionHandler : TGActionHandler {
             text = { action.text },
             replyMessageId = action.asReplyToIntentId?.toIntOrNull(),
             enableHtml = action.enableRichFormatting,
-            customization = {},
+            customization = {
+                disableWebPagePreview = action.silent
+                disableNotification = action.silent
+            },
             shouldTypeBeforeSend = action.showTypeDelay,
             sender = sender
         )
@@ -83,7 +87,7 @@ class TGSendTextActionHandler : TGActionHandler {
     }
 
     private fun generateTypeDelay(messageLength: Int): Long {
-        val baseline = if (messageLength >= 500) 10 else messageLength
+        val baseline = ln(if (messageLength >= 500) 500.0 else messageLength.toDouble())
         val min = baseline * ONE_SYMBOL_TYPING_SPEED_MILLS * 0.9f
         val max = baseline * ONE_SYMBOL_TYPING_SPEED_MILLS * 1.2f
         return randomInt(min.toInt(), max.toInt()).toLong()

@@ -3,50 +3,49 @@ package dev.storozhenko.familybot.feature.global_time
 import dev.storozhenko.familybot.common.extensions.DateConstants
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.code
-import dev.storozhenko.familybot.telegram.send
-import dev.storozhenko.familybot.core.executor.CommandExecutor
-import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
+import dev.storozhenko.familybot.core.executor.CommandIntentExecutor
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.action.Action
+import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.core.model.intent.Intent
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Component
-class TimeExecutor : CommandExecutor() {
+class TimeExecutor : CommandIntentExecutor() {
 
     private val timeFormatter =
         DateTimeFormatter.ofPattern("HH:mm")
 
     companion object {
         private val times = mapOf(
-            "Время в Лондоне:          " to "Europe/London",
+            "Время в Берлине:          " to "Europe/Berlin",
             "Время в Москве:           " to "Europe/Moscow",
-            "Время в Ульяновске:       " to "Europe/Samara",
-            "Время в Ташкенте:         " to "Asia/Tashkent",
-            "Время в Аргентине:        " to "America/Argentina/Buenos_Aires",
+            "Время в Перми:            " to "Asia/Yekaterinburg",
         )
             .map { (prefix, zone) -> prefix.code() to ZoneId.of(zone) }
             .toMap()
     }
 
-    override fun command() = Command.TIME
+    override val command = Command.TIME
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? {
+    override fun execute(intent: Intent): Action? {
         val now = Instant.now()
         val result = times.map { (prefix, zone) -> prefix to now.atZone(zone) }
             .sortedBy { (_, time) -> time }
             .joinToString(separator = "\n") { (prefix, time) ->
                 prefix + time.format(timeFormatter).bold()
             }
-        return {
-            it.me
-            it.send(context, "$result\n${getMortgageDate()}", replyToUpdate = true, enableHtml = true)
-            null
-        }
+
+        return SendTextAction(
+            text = "$result\n${getMortgageDate()}",
+            chat = intent.chat,
+            asReplyToIntentId = intent.id,
+            enableRichFormatting = true
+        )
     }
 
     fun getMortgageDate(): String {

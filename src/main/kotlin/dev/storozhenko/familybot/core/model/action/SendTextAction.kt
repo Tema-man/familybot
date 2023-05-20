@@ -7,5 +7,6 @@ data class SendTextAction(
     val asReplyToIntentId: String? = null,
     val showTypeDelay: Boolean = true,
     val enableRichFormatting: Boolean = false,
-    override val chat: Chat
-) : Action(chat)
+    override val chat: Chat,
+    override val silent: Boolean = false
+) : Action(chat, silent)

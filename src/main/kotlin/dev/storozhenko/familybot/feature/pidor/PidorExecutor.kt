@@ -2,8 +2,8 @@ package dev.storozhenko.familybot.feature.pidor
 
 import dev.storozhenko.familybot.common.extensions.*
 import dev.storozhenko.familybot.core.bot.BotConfig
+import dev.storozhenko.familybot.core.executor.CommandIntentExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
-import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.Pidor
@@ -11,12 +11,11 @@ import dev.storozhenko.familybot.core.model.User
 import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.model.action.CompositeAction
 import dev.storozhenko.familybot.core.model.action.SendTextAction
-import dev.storozhenko.familybot.core.model.intent.CommandIntent
 import dev.storozhenko.familybot.core.model.intent.Intent
+import dev.storozhenko.familybot.core.model.intent.ReplyMessageIntent
 import dev.storozhenko.familybot.core.repository.CommonRepository
 import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
-import dev.storozhenko.familybot.core.services.router.model.Priority
 import dev.storozhenko.familybot.core.services.settings.*
 import dev.storozhenko.familybot.core.services.talking.Dictionary
 import dev.storozhenko.familybot.core.services.talking.model.Phrase
@@ -35,26 +34,19 @@ class PidorExecutor(
     private val easyKeyValueService: EasyKeyValueService,
     private val botConfig: BotConfig,
     private val dictionary: Dictionary
-) : IntentExecutor /*CommandExecutor()*/, Configurable {
+) : CommandIntentExecutor(), Configurable {
 
     private val log = getLogger()
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    val command: Command = Command.PIDOR
-
-    override val priority: Priority = Priority.MEDIUM
-
-    override fun canExecute(intent: Intent): Boolean = (intent as? CommandIntent)?.command == command
+    override val command: Command = Command.PIDOR
 
     override fun execute(intent: Intent): Action? {
         val chat = intent.chat
-        // TODO: Add ReplyIntent.
-//        if (intent.message.isReply) {
-//            return pickPidor(intent)
-//        }
-        log.info("Getting pidors from chat $chat")
+        if (intent is ReplyMessageIntent) return pickPidor(intent)
 
+        log.info("Getting pidors from chat $chat")
         return selectPidor(intent).first
     }
 
@@ -225,78 +217,56 @@ class PidorExecutor(
         return pidorToleranceValue >= limit
     }
 
-//TODO: Enable after ReplyIntent implementation
-    /*private fun pickPidor(context: ExecutorContext): suspend (AbsSender) -> Action? {
-        val abilityCount = easyKeyValueService.get(PickPidorAbilityCount, context.userKey, 0L)
-        if (abilityCount <= 0L) {
-            return {
-                it.send(
-                    context,
-                    context.phrase(Phrase.PICK_PIDOR_PAYMENT_REQUIRED),
-                    shouldTypeBeforeSend = true,
-                    replyToUpdate = true
-                )
-                null
-            }
+    private fun pickPidor(intent: ReplyMessageIntent): Action {
+        val abilityCount = easyKeyValueService.get(PickPidorAbilityCount, intent.from.key, 0L)
+        val phrase = when {
+            abilityCount <= 0L -> Phrase.PICK_PIDOR_PAYMENT_REQUIRED
+            intent.from.role == User.Role.BOT && intent.from.nickname == botConfig.botName -> Phrase.PICK_PIDOR_CURRENT_BOT
+            intent.from.role == User.Role.BOT -> Phrase.PICK_PIDOR_ANY_BOT
+            else -> null
         }
 
-        if (replyMessage.from.isBot) {
-            if (replyMessage.from.userName == botConfig.botName) {
-                return {
-                    it.send(
-                        context,
-                        context.phrase(Phrase.PICK_PIDOR_CURRENT_BOT),
-                        shouldTypeBeforeSend = true,
-                        replyToUpdate = true
-                    )
-                    null
-                }
-            } else {
-                return {
-                    it.send(
-                        context,
-                        context.phrase(Phrase.PICK_PIDOR_ANY_BOT),
-                        shouldTypeBeforeSend = true,
-                        replyToUpdate = true
-                    )
-                    null
-                }
-            }
+        if (phrase != null) {
+            return SendTextAction(
+                text = dictionary.get(phrase, intent.chat.key),
+                chat = intent.chat,
+                asReplyToIntentId = intent.id
+            )
         }
-        val pickedUser = replyMessage.from.toUser(context.chat)
+
+        val pickedUser = intent.from
         repository.addUser(pickedUser)
         repository.addPidor(Pidor(pickedUser, Instant.now()))
-        easyKeyValueService.decrement(PickPidorAbilityCount, context.userKey)
-        return {
-            it.send(
-                context,
-                context.phrase(Phrase.PICK_PIDOR_PICKED).replace("{}", pickedUser.getGeneralName()),
-                shouldTypeBeforeSend = true,
-                replyMessageId = replyMessage.messageId
-            )
-            val newAbilityCount = easyKeyValueService.get(
-                PickPidorAbilityCount,
-                context.userKey
-            )
-            if (newAbilityCount == 0L) {
-                it.send(
-                    context,
-                    context.phrase(Phrase.PICK_PIDOR_ABILITY_COUNT_LEFT_NONE),
-                    shouldTypeBeforeSend = true,
-                    replyToUpdate = true,
-                    enableHtml = true
+        easyKeyValueService.decrement(PickPidorAbilityCount, intent.from.key)
+
+        return CompositeAction(
+            chat = intent.chat,
+            actions = buildList {
+                add(
+                    SendTextAction(
+                        text = dictionary.get(Phrase.PICK_PIDOR_PICKED, intent.chat.key).replace("{}", pickedUser.getGeneralName()),
+                        asReplyToIntentId = intent.id,
+                        chat = intent.chat
+                    )
                 )
-                null
-            } else {
-                it.send(
-                    context,
-                    context.phrase(Phrase.PICK_PIDOR_ABILITY_COUNT_LEFT)
-                        .replace("{}", newAbilityCount.toString()),
-                    shouldTypeBeforeSend = true,
-                    replyToUpdate = true
-                )
-                null
+                add(getPidorAbilityInfoMessage(intent))
             }
+        )
+    }
+
+    private fun getPidorAbilityInfoMessage(intent: ReplyMessageIntent): Action {
+        val newAbilityCount = easyKeyValueService.get(PickPidorAbilityCount, intent.from.key)
+
+        val phrase = when (newAbilityCount) {
+            0L -> Phrase.PICK_PIDOR_ABILITY_COUNT_LEFT_NONE
+            else -> Phrase.PICK_PIDOR_ABILITY_COUNT_LEFT
         }
-    }*/
+
+        return SendTextAction(
+            text = dictionary.get(phrase, intent.chat.key),
+            asReplyToIntentId = intent.id,
+            chat = intent.chat,
+            enableRichFormatting = true
+        )
+    }
 }

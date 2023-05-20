@@ -9,7 +9,7 @@ import dev.storozhenko.familybot.telegram.send
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.bots.AbsSender
 
-@Component
+/*@Component
 class PrivateMessageHelpExecutor(
     private val helpExecutor: HelpCommandExecutor
 ) : PrivateMessageExecutor {
@@ -31,4 +31,4 @@ class PrivateMessageHelpExecutor(
     override fun canExecute(context: ExecutorContext) = context.isFromDeveloper.not()
 
     override fun priority(context: ExecutorContext) = Priority.MEDIUM
-}
+}*/
