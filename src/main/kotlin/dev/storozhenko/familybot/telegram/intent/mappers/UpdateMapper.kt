@@ -17,28 +17,64 @@ class UpdateMapper(
         mapUserLeftIntent(update)?.let { add(it) }
         addAll(mapUserJoinedIntent(update))
         mapBotAddedToChatIntent(update)?.let { add(it) }
-        (mapCommandIntent(update) ?: mapTextMessageIntent(update))?.let { add(it) }
+        (mapCommandIntent(update)
+            ?: mapReplyMessageIntent(update)
+            ?: mapTextMessageIntent(update))?.let { add(it) }
     }
 
     private fun mapCommandIntent(update: Update): Intent? {
         val command = update.command(botConfig) ?: return null
+        val message = if (update.message?.isReply == true) {
+            update.message?.replyToMessage?.text
+        } else {
+            update.message?.text
+                ?: update.editedMessage?.text
+                ?: update.callbackQuery?.message?.text
+        } ?: return null
+
         return CommandIntent(
             id = update.getMessageId(),
             from = update.toUser(botConfig),
             chat = update.toChat(),
             date = update.date(),
-            command = command
+            command = command,
+            text = message.removePrefix(command.toString())
+                .removePrefix("@${botConfig.botName}")
+                .trim(),
         )
     }
 
     private fun mapTextMessageIntent(update: Update): Intent? {
         val message = update.message ?: update.editedMessage ?: update.callbackQuery.message ?: return null
+        val chat = update.toChat()
         return TextMessageIntent(
             id = update.getMessageId(),
             from = update.toUser(botConfig),
-            chat = update.toChat(),
+            chat = chat,
+            date = update.date(),
+            text = message.text.orEmpty()
+        )
+    }
+
+    private fun mapReplyMessageIntent(update: Update): Intent? {
+        val message = update.message ?: update.editedMessage ?: update.callbackQuery.message ?: return null
+        val chat = update.toChat()
+        if (!message.isReply) return null
+
+        val replyToMessage = message.replyToMessage ?: return null
+        val replyText = replyToMessage.text ?: return null
+        val replyUser = replyToMessage.from?.toUser(chat) ?: return null
+
+        return ReplyMessageIntent(
+            id = update.getMessageId(),
+            from = update.toUser(botConfig),
+            chat = chat,
             date = update.date(),
             text = message.text.orEmpty(),
+            reply = ReplyMessageIntent.Reply(
+                text = replyText,
+                from = replyUser
+            )
         )
     }
 

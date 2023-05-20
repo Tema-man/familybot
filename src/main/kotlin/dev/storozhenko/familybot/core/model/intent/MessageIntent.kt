@@ -4,10 +4,10 @@ import dev.storozhenko.familybot.core.model.Chat
 import dev.storozhenko.familybot.core.model.User
 import java.time.Instant
 
-data class TextMessageIntent(
+abstract class MessageIntent(
     override val id: String,
     override val from: User,
     override val chat: Chat,
     override val date: Instant,
-    override val text: String,
-) : MessageIntent(id, from, chat, date, text)
+    open val text: String,
+) : Intent(id, from, chat, date)

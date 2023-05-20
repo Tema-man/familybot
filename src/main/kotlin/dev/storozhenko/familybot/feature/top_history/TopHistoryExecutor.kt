@@ -2,19 +2,18 @@ package dev.storozhenko.familybot.feature.top_history
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import dev.storozhenko.familybot.common.extensions.parseJson
-import dev.storozhenko.familybot.telegram.send
-import dev.storozhenko.familybot.core.executor.CommandExecutor
-import dev.storozhenko.familybot.core.services.router.model.ExecutorContext
-import dev.storozhenko.familybot.telegram.TelegramBot
+import dev.storozhenko.familybot.core.executor.CommandIntentExecutor
 import dev.storozhenko.familybot.core.model.Command
 import dev.storozhenko.familybot.core.model.action.Action
+import dev.storozhenko.familybot.core.model.action.SendTextAction
+import dev.storozhenko.familybot.core.model.intent.Intent
+import dev.storozhenko.familybot.telegram.TelegramBot
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.bots.AbsSender
 
 @Component
-class TopHistoryExecutor : CommandExecutor() {
-    companion object {
+class TopHistoryExecutor : CommandIntentExecutor() {
+    private  companion object {
         val mamoeb: Mamoeb = this::class.java.classLoader
             .getResourceAsStream("static/curses")
             ?.readAllBytes()
@@ -24,14 +23,14 @@ class TopHistoryExecutor : CommandExecutor() {
             ?: throw TelegramBot.InternalException("curses is missing")
     }
 
-    override fun command(): Command = Command.TOP_HISTORY
+    override val command = Command.TOP_HISTORY
 
-    override fun execute(context: ExecutorContext): suspend (AbsSender) -> Action? = { sender ->
-        sender.send(context, mamoeb.curses.random())
-        null
-    }
+    override fun execute(intent: Intent): Action? = SendTextAction(
+        text = mamoeb.curses.random(),
+        chat = intent.chat
+    )
+
+    private data class Mamoeb(
+        @JsonProperty("Templates") val curses: List<String>
+    )
 }
-
-data class Mamoeb(
-    @JsonProperty("Templates") val curses: List<String>
-)

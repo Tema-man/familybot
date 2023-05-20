@@ -1,6 +1,7 @@
 package dev.storozhenko.familybot.feature.pidor
 
 import dev.storozhenko.familybot.common.extensions.*
+import dev.storozhenko.familybot.core.executor.CommandIntentExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.Command
@@ -29,17 +30,13 @@ import java.time.ZoneId
 class TopPidorsByMonthsExecutor(
     private val commonRepository: CommonRepository,
     private val dictionary: Dictionary
-) : IntentExecutor /*CommandExecutor()*/, Configurable {
+) : CommandIntentExecutor(), Configurable {
 
     private val delimiter = "\n========================\n"
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    val command = Command.LEADERBOARD
-
-    override val priority: Priority = Priority.MEDIUM
-
-    override fun canExecute(intent: Intent): Boolean = (intent as? CommandIntent)?.command == command
+    override val command = Command.LEADERBOARD
 
     override fun execute(intent: Intent): Action? {
         val result = commonRepository

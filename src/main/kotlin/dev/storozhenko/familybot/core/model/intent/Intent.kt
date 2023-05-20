@@ -12,4 +12,7 @@ abstract class Intent(
     open val date: Instant,
 ) {
     val userAndChatKey get() = UserAndChatEasyKey(from.id, chat.id)
+
+    val isFromDeveloper: Boolean
+        get() = from.role == User.Role.DEVELOPER
 }

@@ -7,8 +7,8 @@ sourceSets.main {
 }
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("org.jetbrains.kotlin.plugin.spring") version ("1.8.10")
+    kotlin("jvm") version "1.8.20"
+    id("org.jetbrains.kotlin.plugin.spring") version ("1.8.20")
     id("org.springframework.boot") version ("2.4.5")
 }
 
@@ -20,16 +20,17 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.0.4"))
-    implementation("org.springframework.boot:spring-boot-starter-jdbc:3.0.4")
-    implementation("org.springframework.boot:spring-boot-starter-web:3.0.4")
-    implementation("org.springframework.data:spring-data-redis:3.0.4")
-    implementation("org.springframework.boot:spring-boot-starter-actuator:3.0.4")
-    implementation("org.springframework.boot:spring-boot-configuration-processor:3.0.4")
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.0.6"))
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:3.0.6")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.0.6")
+    implementation("org.springframework.data:spring-data-redis:3.0.6")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.0.6")
+    implementation("org.springframework.boot:spring-boot-configuration-processor:3.0.6")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
+
     implementation("org.postgresql:postgresql:42.5.4")
     implementation("io.micrometer:micrometer-core:1.10.5")
     implementation("io.micrometer:micrometer-registry-graphite:1.10.5")
@@ -45,7 +46,7 @@ dependencies {
     implementation("com.theokanning.openai-gpt3-java:client:0.11.0")
     implementation("com.theokanning.openai-gpt3-java:service:0.11.0")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.4")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.0.6")
     testImplementation("org.testcontainers:testcontainers:1.17.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.8.10")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")

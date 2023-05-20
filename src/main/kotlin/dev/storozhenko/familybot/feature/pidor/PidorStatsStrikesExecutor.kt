@@ -3,6 +3,7 @@ package dev.storozhenko.familybot.feature.pidor
 import dev.storozhenko.familybot.common.extensions.PluralizedWordsProvider
 import dev.storozhenko.familybot.common.extensions.bold
 import dev.storozhenko.familybot.common.extensions.formatTopList
+import dev.storozhenko.familybot.core.executor.CommandIntentExecutor
 import dev.storozhenko.familybot.core.executor.Configurable
 import dev.storozhenko.familybot.core.executor.IntentExecutor
 import dev.storozhenko.familybot.core.model.Command
@@ -25,15 +26,11 @@ class PidorStatsStrikesExecutor(
     private val pidorStrikeStorage: PidorStrikeStorage,
     private val commonRepository: CommonRepository,
     private val dictionary: Dictionary
-) : IntentExecutor /*CommandExecutor()*/, Configurable {
+) : CommandIntentExecutor(), Configurable {
 
     override fun getFunctionId(context: ExecutorContext) = FunctionId.PIDOR
 
-    val command = Command.STATS_STRIKES
-
-    override val priority: Priority = Priority.MEDIUM
-
-    override fun canExecute(intent: Intent): Boolean = (intent as? CommandIntent)?.command == command
+    override val command = Command.STATS_STRIKES
 
     override fun execute(intent: Intent): Action? {
         val chatKey = intent.chat.key

@@ -10,5 +10,6 @@ data class CommandIntent(
     override val from: User,
     override val chat: Chat,
     override val date: Instant,
-    val command: Command
+    val command: Command,
+    val text: String? = null
 ) : Intent(id, from, chat, date)
