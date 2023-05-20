@@ -8,6 +8,7 @@ import dev.storozhenko.familybot.core.model.intent.Intent
 import dev.storozhenko.familybot.core.services.router.IntentsRouter
 import dev.storozhenko.familybot.core.services.router.PaymentRouter
 import dev.storozhenko.familybot.core.services.router.PollRouter
+import dev.storozhenko.familybot.core.services.router.Router
 import dev.storozhenko.familybot.core.services.router.model.FunctionId
 import dev.storozhenko.familybot.core.services.settings.ChatEasyKey
 import dev.storozhenko.familybot.core.services.settings.EasyKeyValueService
@@ -31,10 +32,12 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllPrivateChats
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class TelegramBot(
     val config: BotConfig,
+    val router: Router,
     val intentsRouter: IntentsRouter,
     val pollRouter: PollRouter,
     val paymentRouter: PaymentRouter,
@@ -45,7 +48,8 @@ class TelegramBot(
 
     private val log = LoggerFactory.getLogger(TelegramBot::class.java)
     private val routerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val channels = HashMap<Long, Channel<Intent>>()
+    private val channels = ConcurrentHashMap<Long, Channel<Intent>>()
+    private val updateChannels = ConcurrentHashMap<Long, Channel<Update>>()
 
     override fun getBotUsername(): String = config.botName
 
@@ -58,12 +62,12 @@ class TelegramBot(
             }
         }
 
-//        when {
-//            update.hasPollAnswer() -> proceedPollAnswer(update)
-//            update.hasPreCheckoutQuery() || update.message?.hasSuccessfulPayment() == true -> proceedPayment(update)
-//            update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
-//            update.hasPoll() -> {}
-//        }
+        when {
+            update.hasPollAnswer() -> proceedPollAnswer(update)
+            update.hasPreCheckoutQuery() || update.message?.hasSuccessfulPayment() == true -> proceedPayment(update)
+            update.hasMessage() || update.hasCallbackQuery() || update.hasEditedMessage() -> proceedMessage(update)
+            update.hasPoll() -> {}
+        }
     }
 
     override suspend fun start(context: ConfigurableApplicationContext) {
@@ -92,6 +96,57 @@ class TelegramBot(
 
     private suspend fun processIntent(intent: Intent) {
         channels.getOrPut(intent.chat.id) { createChannel() }.send(intent)
+    }
+
+    private fun proceedMessage(update: Update) = routerScope.launch {
+        val chat = update.toChat()
+        val channel = updateChannels.computeIfAbsent(chat.id) { createUpdateChannel() }
+        channel.send(update)
+    }
+
+    private fun createUpdateChannel(): Channel<Update> {
+        val channel = Channel<Update>()
+        routerScope.launch {
+            for (incomingUpdate in channel) {
+                proceed(incomingUpdate)
+            }
+        }
+        return channel
+    }
+
+    private suspend fun proceed(update: Update) {
+        try {
+            val user = update.toUser()
+            MDC.put("chat", "${user.chat.name}:${user.chat.id}")
+            MDC.put("user", "${user.name}:${user.id}")
+            val action = router.processUpdate(update).invoke(this@TelegramBot)
+
+            if (action != null) {
+                actionProcessor.handle(action, this@TelegramBot)
+            }
+        } catch (e: TelegramApiRequestException) {
+            val logMessage =
+                "Telegram error: ${e.apiResponse}, ${e.errorCode}, update is ${update.toJson()}"
+            if (e.errorCode in 400..499) {
+                log.warn(logMessage, e)
+                if (e.apiResponse.contains("CHAT_WRITE_FORBIDDEN")) {
+                    listOf(FunctionId.Chatting, FunctionId.Huificate, FunctionId.TalkBack)
+                        .forEach { function ->
+                            easyKeyValueService.put(
+                                function,
+                                ChatEasyKey(update.toChat().id),
+                                false
+                            )
+                        }
+                }
+            } else {
+                log.error(logMessage, e)
+            }
+        } catch (e: Exception) {
+            log.error("Unexpected error, update is ${update.toJson()}", e)
+        } finally {
+            MDC.clear()
+        }
     }
 
     private fun createChannel(): Channel<Intent> = Channel<Intent>().also { channel ->

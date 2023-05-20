@@ -6,10 +6,7 @@ import dev.storozhenko.familybot.common.meteredCanExecute
 import dev.storozhenko.familybot.common.meteredExecute
 import dev.storozhenko.familybot.common.meteredPriority
 import dev.storozhenko.familybot.core.bot.BotConfig
-import dev.storozhenko.familybot.core.executor.CommandExecutor
-import dev.storozhenko.familybot.core.executor.Configurable
-import dev.storozhenko.familybot.core.executor.Executor
-import dev.storozhenko.familybot.core.executor.PrivateMessageExecutor
+import dev.storozhenko.familybot.core.executor.*
 import dev.storozhenko.familybot.core.model.CommandByUser
 import dev.storozhenko.familybot.core.model.action.Action
 import dev.storozhenko.familybot.core.repository.ChatLogRepository
@@ -31,13 +28,13 @@ import dev.storozhenko.familybot.telegram.toUser
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
-import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.User
 import org.telegram.telegrambots.meta.bots.AbsSender
 import java.time.Instant
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
+import org.telegram.telegrambots.meta.api.objects.Message as TelegramMessage
 
 @Component
 @Deprecated("Will be replaced with IntentsRouter", ReplaceWith("IntentsRouter"))
@@ -67,8 +64,15 @@ class Router(
             ?: update.callbackQuery.message
 
         val chat = message.chat
-
         val isGroup = chat.isSuperGroupChat || chat.isGroupChat
+
+        val context = update.context(botConfig, dictionary)
+        val executor = selectExecutor(context, forSingleUser = !isGroup)
+        if (executor is IntentExecutor) {
+            logger.warn("Executor already applied")
+            return { null }
+        }
+
         if (!isGroup) {
             logger.warn("Someone is sending private messages: $update")
         } else {
@@ -76,8 +80,6 @@ class Router(
             if (update.hasEditedMessage()) return { null }
         }
 
-        val context = update.context(botConfig, dictionary)
-        val executor = selectExecutor(context, forSingleUser = !isGroup)
         logger.info("Executor to apply: ${executor.javaClass.simpleName}")
 
         return if (isExecutorDisabled(executor, context)) {
