@@ -33,7 +33,7 @@ class TalkingServiceChatGpt(
         private val codeMarkupPattern = Regex("`{1,3}([^`]+)`{1,3}")
     }
 
-    private val openAI = OpenAiService(botConfig.openAiToken, Duration.ofMinutes(2))
+    private val openAI = botConfig.openAiToken?.let { OpenAiService(it, Duration.ofMinutes(2))}
 
     private val caches = GptStyle
         .values()
@@ -44,6 +44,7 @@ class TalkingServiceChatGpt(
         }
 
     override suspend fun getReplyToUser(context: ExecutorContext, shouldBeQuestion: Boolean): String {
+        if(openAI == null) return ""
         val text = context.message.text ?: "Я скинул тупой медиафайл"
         val chatId = context.chat.idString
         if (text == "/reset") {

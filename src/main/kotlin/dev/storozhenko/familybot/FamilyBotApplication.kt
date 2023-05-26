@@ -39,9 +39,6 @@ class FamilyBotApplication(
     private val launchScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @[Bean Suppress("unused")]
-    fun injectTimedAspect(registry: MeterRegistry): TimedAspect = TimedAspect(registry)
-
-    @[Bean Suppress("unused")]
     fun injectBotConfig(appConfig: AppConfig, telegramConfig: TelegramConfig): BotConfig {
         val botNameAliases = if (appConfig.botNameAliases.isNullOrEmpty()) {
             logger.warn("No bot aliases provided, using botName")
